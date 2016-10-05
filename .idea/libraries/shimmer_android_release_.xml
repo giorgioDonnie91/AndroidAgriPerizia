@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="shimmer-android-release-">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Android/build/intermediates/exploded-aar/shimmer-android-release/res" />
+      <root url="jar://$PROJECT_DIR$/Android/build/intermediates/exploded-aar/shimmer-android-release/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
