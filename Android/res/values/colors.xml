@@ -53,4 +53,9 @@
     <color name="accent">#795548</color>
     <color name="primary_text">#212121</color>
 
+    <color name="circle_area_color">#55068FD3</color>
+    <color name="circle_stroke_color">#99068FD3</color>
+
+    <color name="quadrilateral_area_color">#55FFFF00</color>
+    <color name="quadrilateral_stroke_color">#99FFFF00</color>
 </resources>

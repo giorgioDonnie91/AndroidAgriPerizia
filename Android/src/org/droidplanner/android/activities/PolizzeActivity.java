@@ -156,7 +156,7 @@ public class PolizzeActivity extends AppCompatActivity {
                                 JSONObject responseJSON = new JSONObject(response);
                                 JSONArray percorsiJSON = responseJSON.optJSONArray("percorsi");
                                 if(percorsiJSON.length() == 0) {
-                                    startActivity(new Intent(PolizzeActivity.this, FlightActivity.class));
+                                    startActivity(new Intent(PolizzeActivity.this, EditorActivity.class));
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();

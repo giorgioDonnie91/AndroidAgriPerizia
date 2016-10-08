@@ -50,7 +50,6 @@ class TrashToolsImpl extends EditorToolsImpl implements View.OnClickListener {
     public void setup() {
         EditorToolsFragment.EditorToolListener listener = editorToolsFragment.listener;
         if (listener != null) {
-            listener.enableGestureDetection(false);
             listener.skipMarkerClickEvents(false);
         }
 

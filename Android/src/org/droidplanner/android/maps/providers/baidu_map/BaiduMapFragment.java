@@ -63,6 +63,7 @@ import org.droidplanner.android.utils.collection.HashBiMap;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 import org.droidplanner.android.utils.prefs.DroidPlannerPrefs;
 import org.droidplanner.android.maps.providers.google_map.tiles.mapbox.offline.MapDownloader;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -294,6 +295,11 @@ public class BaiduMapFragment extends SupportMapFragment implements DPMap{
     @Override
     public DPMapProvider getProvider() {
         return DPMapProvider.BAIDU_MAP;
+    }
+
+    @Override
+    public void updateWrapperPercorso(WrapperPercorso wrapperPercorso) {
+
     }
 
     @Override

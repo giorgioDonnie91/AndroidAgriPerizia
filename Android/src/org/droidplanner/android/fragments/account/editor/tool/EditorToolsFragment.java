@@ -40,13 +40,11 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
     private static final String STATE_SELECTED_TOOL = "selected_tool";
 
     public enum EditorTools {
-        MARKER, DRAW, TRASH, SELECTOR, NONE
+        MARKER, TRASH, SELECTOR, NONE
     }
 
     public interface EditorToolListener {
         void editorToolChanged(EditorTools tools);
-
-        void enableGestureDetection(boolean enable);
 
         void skipMarkerClickEvents(boolean skip);
 
@@ -80,7 +78,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
 
     {
         editorToolsImpls[EditorTools.MARKER.ordinal()] = new MarkerToolsImpl(this);
-        editorToolsImpls[EditorTools.DRAW.ordinal()] = new DrawToolsImpl(this);
         editorToolsImpls[EditorTools.TRASH.ordinal()] = new TrashToolsImpl(this);
         editorToolsImpls[EditorTools.SELECTOR.ordinal()] = new SelectorToolsImpl(this);
         editorToolsImpls[EditorTools.NONE.ordinal()] = new NoneToolsImpl(this);
@@ -93,14 +90,13 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
 
     //Sub action views
     private View editorSubTools;
-    private Spinner drawItemsSpinner;
     private Spinner markerItemsSpinner;
 
     private View clearSubOptions;
     TextView clearMission;
     TextView clearSelected;
 
-     TextView selectAll;
+    TextView selectAll;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -124,15 +120,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
 
         mEditorRadioGroup = (RadioGroup) view.findViewById(R.id.editor_tools_layout);
         editorSubTools = view.findViewById(R.id.editor_sub_tools);
-
-        final DrawToolsImpl drawToolImpl = (DrawToolsImpl) editorToolsImpls[EditorTools.DRAW.ordinal()];
-        final RadioButtonCenter buttonDraw = (RadioButtonCenter) view.findViewById(R.id.editor_tools_draw);
-        final AdapterMissionItems drawItemsAdapter = new AdapterMissionItems(context,
-                R.layout.spinner_drop_down_mission_item, DrawToolsImpl.DRAW_ITEMS_TYPE);
-        drawItemsSpinner = (Spinner) view.findViewById(R.id.draw_items_spinner);
-        drawItemsSpinner.setAdapter(drawItemsAdapter);
-        drawItemsSpinner.setSelection(drawItemsAdapter.getPosition(drawToolImpl.getSelected()));
-        drawItemsSpinner.setOnItemSelectedListener(drawToolImpl);
 
         final MarkerToolsImpl markerToolImpl = (MarkerToolsImpl) editorToolsImpls[EditorTools.MARKER.ordinal()];
         final RadioButtonCenter buttonMarker = (RadioButtonCenter) view.findViewById(R.id.editor_tools_marker);
@@ -159,7 +146,7 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         selectAll = (TextView) view.findViewById(R.id.select_all_button);
         selectAll.setOnClickListener(selectorToolImpl);
 
-        for (View vv : new View[]{buttonDraw, buttonMarker, buttonTrash, buttonSelector}) {
+        for (View vv : new View[]{buttonMarker, buttonTrash, buttonSelector}) {
             vv.setOnClickListener(this);
         }
     }
@@ -254,8 +241,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         if (markerItemsSpinner != null)
             markerItemsSpinner.setVisibility(View.GONE);
 
-        if (drawItemsSpinner != null)
-            drawItemsSpinner.setVisibility(View.GONE);
     }
 
     public EditorTools getTool() {
@@ -323,11 +308,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
                 clearSubOptions.setVisibility(View.VISIBLE);
                 break;
 
-            case DRAW:
-                editorSubTools.setVisibility(View.VISIBLE);
-                drawItemsSpinner.setVisibility(View.VISIBLE);
-                break;
-
             case MARKER:
                 editorSubTools.setVisibility(View.VISIBLE);
                 markerItemsSpinner.setVisibility(View.VISIBLE);
@@ -360,9 +340,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
             case R.id.editor_tools_marker:
                 return EditorTools.MARKER;
 
-            case R.id.editor_tools_draw:
-                return EditorTools.DRAW;
-
             case R.id.editor_tools_trash:
                 return EditorTools.TRASH;
 
@@ -384,9 +361,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         switch (tool) {
             case MARKER:
                 return R.id.editor_tools_marker;
-
-            case DRAW:
-                return R.id.editor_tools_draw;
 
             case TRASH:
                 return R.id.editor_tools_trash;

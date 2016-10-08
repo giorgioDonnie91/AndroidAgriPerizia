@@ -11,6 +11,7 @@ import com.o3dr.services.android.lib.drone.property.FootPrint;
 import org.droidplanner.android.maps.providers.DPMapProvider;
 import org.droidplanner.android.maps.providers.google_map.tiles.mapbox.offline.MapDownloader;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,7 +58,9 @@ public interface DPMap {
 	String PREF_ZOOM = "pref_map_zoom";
 	int DEFAULT_ZOOM_LEVEL = 17;
 
-	interface PathSource {
+    void updateWrapperPercorso(WrapperPercorso wrapperPercorso);
+
+    interface PathSource {
 		List<LatLong> getPathPoints();
 	}
 
@@ -417,6 +420,7 @@ public interface DPMap {
 	 *            source to use to draw the mission path
 	 */
 	void updateMissionPath(PathSource pathSource);
+
 	
 	/**
 	 * Updates the polygons on the map.

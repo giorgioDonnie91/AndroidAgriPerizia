@@ -1,15 +1,23 @@
 package org.droidplanner.android.fragments;
 
 import android.app.Activity;
+import android.location.Location;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.SphericalUtil;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeType;
+import com.o3dr.services.android.lib.drone.mission.MissionItemType;
 import com.o3dr.services.android.lib.drone.mission.item.MissionItem;
+import com.o3dr.services.android.lib.drone.mission.item.spatial.BaseSpatialItem;
 import com.o3dr.services.android.lib.drone.property.Home;
 
 import org.droidplanner.android.activities.interfaces.OnEditorInteraction;
@@ -18,25 +26,32 @@ import org.droidplanner.android.maps.MarkerInfo;
 import org.droidplanner.android.proxy.mission.item.markers.MissionItemMarkerInfo;
 import org.droidplanner.android.proxy.mission.item.markers.PolygonMarkerInfo;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorsoMarkerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickListener,
-		DPMap.OnMarkerDragListener, DPMap.OnMapClickListener, DPMap.OnMarkerClickListener {
+		DPMap.OnMarkerDragListener, DPMap.OnMapClickListener, DPMap.OnMarkerClickListener, DroneMap.MapMarkerProvider, LocationListener {
+
+
+    public static final float MAX_USER_DRONE_DISTANCE = 500; //m
+
+    WrapperPercorso wrapperPercorso;
 
 	private OnEditorInteraction editorListener;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
-		View view = super.onCreateView(inflater, viewGroup, bundle);
-
+		FrameLayout frameLayout = (FrameLayout)super.onCreateView(inflater, viewGroup, bundle);
+        
 		mMapFragment.setOnMarkerDragListener(this);
 		mMapFragment.setOnMarkerClickListener(this);
 		mMapFragment.setOnMapClickListener(this);
 		mMapFragment.setOnMapLongClickListener(this);
 
-		return view;
+		return frameLayout;
 	}
 
 	@Override
@@ -46,14 +61,25 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 	@Override
 	public void onMarkerDrag(MarkerInfo markerInfo) {
 		checkForWaypointMarkerMoving(markerInfo);
+        checkForWrapperPercorsoUpdate(markerInfo);
 	}
 
 	@Override
 	public void onMarkerDragStart(MarkerInfo markerInfo) {
 		checkForWaypointMarkerMoving(markerInfo);
+        checkForWrapperPercorsoUpdate(markerInfo);
 	}
 
-	private void checkForWaypointMarkerMoving(MarkerInfo markerInfo) {
+    private void checkForWrapperPercorsoUpdate(MarkerInfo markerInfo) {
+        if (markerInfo instanceof WrapperPercorsoMarkerInfo) {
+            WrapperPercorsoMarkerInfo wrapperPercorsoMarkerInfo = (WrapperPercorsoMarkerInfo)markerInfo;
+            WrapperPercorso wrapperPercorso = wrapperPercorsoMarkerInfo.getWrapperPercorso();
+
+            mMapFragment.updateWrapperPercorso(wrapperPercorso);
+        }
+    }
+
+    private void checkForWaypointMarkerMoving(MarkerInfo markerInfo) {
 		if (markerInfo instanceof MissionItem.SpatialItem) {
 			LatLong position = markerInfo.getPosition();
 
@@ -153,5 +179,65 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
             mMapFragment.zoomToFit(itemsToFit);
         }
     }
+
+    @Override
+    public MarkerInfo[] getMapMarkers() {
+        if(wrapperPercorso == null)
+            return new MarkerInfo[0];
+
+        return wrapperPercorso.getMarkersInfo();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mMapFragment.setLocationListener(null);
+        removeMapMarkerProvider(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMapFragment.setLocationListener(this);
+        addMapMarkerProvider(this);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        if(wrapperPercorso != null)
+            return;
+
+        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+        wrapperPercorso = new WrapperPercorso(getMaxSquare(position));
+        mMapFragment.updateWrapperPercorso(wrapperPercorso);
+        postUpdate();
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
+    }
+
+    private ArrayList<LatLng> getMaxSquare(LatLng center){
+        ArrayList<LatLng> vertices = new ArrayList<>();
+
+        vertices.add(SphericalUtil.computeOffset(center, MAX_USER_DRONE_DISTANCE, 315));
+        vertices.add(SphericalUtil.computeOffset(center, MAX_USER_DRONE_DISTANCE, 45));
+        vertices.add(SphericalUtil.computeOffset(center, MAX_USER_DRONE_DISTANCE, 135));
+        vertices.add(SphericalUtil.computeOffset(center, MAX_USER_DRONE_DISTANCE, 225));
+
+        return vertices;
+    }
+
 
 }

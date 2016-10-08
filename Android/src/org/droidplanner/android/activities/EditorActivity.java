@@ -34,8 +34,6 @@ import org.droidplanner.android.fragments.EditorMapFragment;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsFragment;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsFragment.EditorTools;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsImpl;
-import org.droidplanner.android.fragments.helpers.GestureMapFragment;
-import org.droidplanner.android.fragments.helpers.GestureMapFragment.OnPathFinishedListener;
 import org.droidplanner.android.proxy.mission.MissionProxy;
 import org.droidplanner.android.proxy.mission.MissionSelection;
 import org.droidplanner.android.proxy.mission.item.MissionItemProxy;
@@ -51,7 +49,7 @@ import java.util.List;
  * This implements the map editor activity. The map editor activity allows the
  * user to create and/or modify autonomous missions for the drone.
  */
-public class EditorActivity extends DrawerNavigationUI implements OnPathFinishedListener,
+public class EditorActivity extends DrawerNavigationUI implements
         EditorToolsFragment.EditorToolListener, MissionDetailFragment.OnMissionDetailListener,
         OnEditorInteraction, MissionSelection.OnSelectionUpdateListener, OnClickListener,
         OnLongClickListener, SupportEditInputDialog.Listener {
@@ -86,7 +84,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
                     break;
 
                 case AttributeEvent.MISSION_RECEIVED:
-                    final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
                     if (planningMapFragment != null) {
                         planningMapFragment.zoomToFit();
                     }
@@ -105,7 +102,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
     /*
      * View widgets.
      */
-    private GestureMapFragment gestureMapFragment;
     private EditorToolsFragment editorToolsFragment;
     private MissionDetailFragment itemDetailFragment;
     private FragmentManager fragmentManager;
@@ -119,6 +115,7 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
 
     private FloatingActionButton itemDetailToggle;
     private EditorListFragment editorListFragment;
+    private EditorMapFragment planningMapFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -127,10 +124,10 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        gestureMapFragment = ((GestureMapFragment) fragmentManager.findFragmentById(R.id.editor_map_fragment));
-        if (gestureMapFragment == null) {
-            gestureMapFragment = new GestureMapFragment();
-            fragmentManager.beginTransaction().add(R.id.editor_map_fragment, gestureMapFragment).commit();
+        planningMapFragment = ((EditorMapFragment) fragmentManager.findFragmentById(R.id.editor_map_fragment));
+        if(planningMapFragment == null){
+            planningMapFragment = new EditorMapFragment();
+            fragmentManager.beginTransaction().add(R.id.editor_map_fragment, planningMapFragment).commit();
         }
 
         editorListFragment = (EditorListFragment) fragmentManager.findFragmentById(R.id.mission_list_fragment);
@@ -159,7 +156,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
         // Retrieve the item detail fragment using its tag
         itemDetailFragment = (MissionDetailFragment) fragmentManager.findFragmentByTag(ITEM_DETAIL_TAG);
 
-        gestureMapFragment.setOnPathFinishedListener(this);
         openActionDrawer();
     }
 
@@ -206,8 +202,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
 
     @Override
     public void onClick(View v) {
-        final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
-
         switch (v.getId()) {
             case R.id.toggle_action_drawer:
                 if (missionProxy == null)
@@ -240,8 +234,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
 
     @Override
     public boolean onLongClick(View view) {
-        final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
-
         switch (view.getId()) {
             case R.id.drone_location_button:
                 planningMapFragment.setAutoPanMode(AutoPanMode.DRONE);
@@ -309,7 +301,7 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
 
                 if(missionProxy != null) {
                     missionProxy.readMissionFromFile(reader);
-                    gestureMapFragment.getMapFragment().zoomToFit();
+                    planningMapFragment.zoomToFit();
                 }
             }
         };
@@ -358,7 +350,7 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        gestureMapFragment.getMapFragment().saveCameraPosition();
+        planningMapFragment.saveCameraPosition();
     }
 
     private void updateMissionLength() {
@@ -403,23 +395,9 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
         setupTool();
     }
 
-    @Override
-    public void enableGestureDetection(boolean enable) {
-        if (gestureMapFragment == null)
-            return;
-
-        if (enable)
-            gestureMapFragment.enableGestureDetection();
-        else
-            gestureMapFragment.disableGestureDetection();
-    }
 
     @Override
     public void skipMarkerClickEvents(boolean skip) {
-        if (gestureMapFragment == null)
-            return;
-
-        final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
         if (planningMapFragment != null)
             planningMapFragment.skipMarkerClickEvents(skip);
     }
@@ -482,14 +460,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
     }
 
     @Override
-    public void onPathFinished(List<LatLong> path) {
-        final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
-        List<LatLong> points = planningMapFragment.projectPathIntoMap(path);
-        EditorToolsImpl toolImpl = getToolImpl();
-        toolImpl.onPathFinished(points);
-    }
-
-    @Override
     public void onDetailDialogDismissed(List<MissionItemProxy> itemList) {
         if (missionProxy != null) missionProxy.selection.removeItemsFromSelection(itemList);
     }
@@ -533,7 +503,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
 
     @Override
     public void zoomToFitSelected() {
-        final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
         List<MissionItemProxy> selected = missionProxy.selection.getSelected();
         if (selected.isEmpty()) {
             planningMapFragment.zoomToFit();
@@ -570,7 +539,6 @@ public class EditorActivity extends DrawerNavigationUI implements OnPathFinished
             }
         }
 
-        final EditorMapFragment planningMapFragment = gestureMapFragment.getMapFragment();
         if (planningMapFragment != null)
             planningMapFragment.postUpdate();
     }

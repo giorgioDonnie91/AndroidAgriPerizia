@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,6 +43,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -53,6 +56,8 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.android.SphericalUtil;
 import com.o3dr.android.client.Drone;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
@@ -64,6 +69,7 @@ import com.o3dr.services.android.lib.util.googleApi.GoogleApiClientManager.Googl
 
 import org.droidplanner.android.DroidPlannerApp;
 import org.droidplanner.android.R;
+import org.droidplanner.android.fragments.EditorMapFragment;
 import org.droidplanner.android.fragments.SettingsFragment;
 import org.droidplanner.android.graphic.map.GraphicHome;
 import org.droidplanner.android.maps.DPMap;
@@ -78,6 +84,8 @@ import org.droidplanner.android.utils.DroneHelper;
 import org.droidplanner.android.utils.collection.HashBiMap;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 import org.droidplanner.android.utils.prefs.DroidPlannerPrefs;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorsoMarkerInfo;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -95,6 +103,8 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
     private static final long USER_LOCATION_UPDATE_INTERVAL = 30000; // ms
     private static final long USER_LOCATION_UPDATE_FASTEST_INTERVAL = 5000; // ms
     private static final float USER_LOCATION_UPDATE_MIN_DISPLACEMENT = 0; // m
+
+    private static final float CIRCLE_STROKE_WIDTH = 3;
 
     private static final float GO_TO_MY_LOCATION_ZOOM = 17f;
 
@@ -160,28 +170,37 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
         public void onLocationResult(LocationResult result) {
             super.onLocationResult(result);
 
-            final Location location = result.getLastLocation();
-            if (location == null)
-                return;
+            Location location = result.getLastLocation();
+            final LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
 
             //Update the user location icon.
             if (userMarker == null) {
                 final MarkerOptions options = new MarkerOptions()
-                        .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                        .position(position)
                         .draggable(false)
                         .flat(true)
                         .visible(true)
                         .anchor(0.5f, 0.5f)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.user_location));
 
+                final CircleOptions circleOptions = new CircleOptions()
+                        .center(position)
+                        .radius(EditorMapFragment.MAX_USER_DRONE_DISTANCE)
+                        .strokeWidth(CIRCLE_STROKE_WIDTH)
+                        .strokeColor(ContextCompat.getColor(getContext(), R.color.circle_stroke_color))
+                        .fillColor(ContextCompat.getColor(getContext(), R.color.circle_area_color));
+
                 getMapAsync(new OnMapReadyCallback() {
                     @Override
                     public void onMapReady(GoogleMap googleMap) {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position , 14.0f));
                         userMarker = googleMap.addMarker(options);
+                        circle = googleMap.addCircle(circleOptions);
                     }
                 });
             } else {
-                userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+                userMarker.setPosition(position);
+                circle.setCenter(position);
             }
 
             if (mPanMode.get() == AutoPanMode.USER) {
@@ -242,6 +261,7 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
     private GoogleApiClientManager mGApiClientMgr;
 
     private Marker userMarker;
+    private Circle circle;
 
     private Polyline flightPath;
     private Polyline missionPath;
@@ -263,6 +283,8 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
 
     protected DroidPlannerApp dpApp;
     private Polygon footprintPoly;
+
+    private Polygon wrapperPercorsoPoly;
 
     /*
     Tile overlay
@@ -449,6 +471,21 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
     }
 
     @Override
+    public void updateWrapperPercorso(WrapperPercorso wrapperPercorso) {
+        if(wrapperPercorsoPoly == null) {
+            PolygonOptions pathOptions = new PolygonOptions();
+            pathOptions.strokeColor(ContextCompat.getColor(getContext(), R.color.quadrilateral_stroke_color))
+                    .add(wrapperPercorso.getVerticesArray())
+                    .strokeWidth(CIRCLE_STROKE_WIDTH)
+                    .fillColor(ContextCompat.getColor(getContext(), R.color.quadrilateral_area_color));
+
+            wrapperPercorsoPoly = getMap().addPolygon(pathOptions);
+        }
+
+        wrapperPercorsoPoly.setPoints(wrapperPercorso.getVertices());
+    }
+
+    @Override
     public void addFlightPathPoint(LatLong coord) {
         final LatLng position = DroneHelper.CoordToLatLang(coord);
 
@@ -552,7 +589,7 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
     @Override
     public void updateMarkers(List<MarkerInfo> markersInfos, boolean isDraggable) {
         for (MarkerInfo info : markersInfos) {
-            updateMarker(info, isDraggable);
+            updateMarker(info, info.isDraggable());
         }
     }
 
@@ -1194,4 +1231,7 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
     public void onManagerStopped() {
 
     }
+
+
+
 }
