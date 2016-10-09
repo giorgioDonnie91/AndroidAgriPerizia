@@ -3,8 +3,11 @@ package org.droidplanner.android.network.request;
 
 import org.droidplanner.android.network.NameValuePair;
 
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -19,15 +22,19 @@ public class Post extends Request{
     public HttpURLConnection connect() throws IOException {
         URL url = new URL(getRequestUrl());
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod("POST");
-        urlConnection.setDoOutput(true);
 
-        DataOutputStream dos = new DataOutputStream(urlConnection.getOutputStream());
-        dos.writeBytes(getQuery());
-        dos.flush();
-        dos.close();
+        String postParameters = getQuery();
+        urlConnection.setDoOutput(true);
+        urlConnection.setRequestMethod("POST");
+
+        DataOutputStream dataOutputStream = new DataOutputStream(urlConnection.getOutputStream());
+
+        dataOutputStream.writeBytes(postParameters);
+        dataOutputStream.flush();
+        dataOutputStream.close();
 
         urlConnection.connect();
         return urlConnection;
     }
+
 }

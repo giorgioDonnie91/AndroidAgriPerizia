@@ -10,6 +10,10 @@ import java.util.List;
 
 public class Get extends Request {
 
+    public Get(String requestUrl) {
+        this(requestUrl, null);
+    }
+
     public Get(String requestUrl, List<NameValuePair> parameters) {
         super(requestUrl, parameters);
     }

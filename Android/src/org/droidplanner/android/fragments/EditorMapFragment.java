@@ -45,7 +45,21 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
 		FrameLayout frameLayout = (FrameLayout)super.onCreateView(inflater, viewGroup, bundle);
-        
+
+        Button button = new Button(viewGroup.getContext());
+        button.setText("CALCOLA");
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ArrayList<LatLng> vertices = wrapperPercorso.getVertices();
+                for (LatLng vertex : vertices){
+                    BaseSpatialItem spatialItem = (BaseSpatialItem) MissionItemType.WAYPOINT.getNewItem();
+                    missionProxy.addSpatialWaypoint(spatialItem, new LatLong(vertex.latitude, vertex.longitude));
+                }
+            }
+        });
+        frameLayout.addView(button, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
 		mMapFragment.setOnMarkerDragListener(this);
 		mMapFragment.setOnMarkerClickListener(this);
 		mMapFragment.setOnMapClickListener(this);

@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import org.droidplanner.android.network.request.Get;
+import org.droidplanner.android.network.request.Post;
 import org.droidplanner.android.network.request.Request;
 
 import java.io.ByteArrayOutputStream;
@@ -29,15 +30,19 @@ public class ComunicazioneConServerThread extends Thread{
         try {
             HttpURLConnection urlConnection = request.connect();
 
-            InputStream in = urlConnection.getInputStream();
-            byte[] buffer = new byte[1024];
+            final int responseCode = urlConnection.getResponseCode();
+            InputStream in;
+            if(responseCode == 200)
+                in = urlConnection.getInputStream();
+            else
+                in = urlConnection.getErrorStream();
+
+            byte[] buffer = new byte[8192];
             int numRead;
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            while((numRead=in.read(buffer))!=-1){
+            while((numRead = in.read(buffer))!=-1){
                 baos.write(buffer, 0, numRead); }
             in.close();
-
-            final int responseCode = urlConnection.getResponseCode();
             final String responseContent = new String(baos.toByteArray());
 
             Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -72,6 +77,18 @@ public class ComunicazioneConServerThread extends Thread{
         LinkedList<NameValuePair> parameter = new LinkedList<>();
         parameter.add(new NameValuePair("CodPZ", codicePolizza));
         return new Get(BASE_URL + "getPercorsiByCodPZ.php", parameter);
+    }
+
+    public static Request createPercorso(String codicePercorso, String codicePolizza){
+        LinkedList<NameValuePair> parameter = new LinkedList<>();
+        parameter.add(new NameValuePair("codPR", codicePercorso));
+        parameter.add(new NameValuePair("codPZ", codicePolizza));
+        return new Post(BASE_URL + "newPercorso.php", parameter);
+    }
+
+    public static Request uploadPhotoRequest(String codicePercorso, int index){
+        return null;
+        //return new MultiPart(BASE_URL + "testFoto.php", new FilePart(new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download/images.jpg"), "userfile"));
     }
 
     public interface RequestListener{

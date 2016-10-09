@@ -5,13 +5,14 @@ import org.droidplanner.android.network.NameValuePair;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 
 public abstract class Request{
     private final String requestUrl;
     private final List<NameValuePair> parameters;
+
 
     public Request(String requestUrl, List<NameValuePair> parameters) {
         this.requestUrl = requestUrl;
