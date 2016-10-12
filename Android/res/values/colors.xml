@@ -58,4 +58,5 @@
 
     <color name="quadrilateral_area_color">#55FFFF00</color>
     <color name="quadrilateral_stroke_color">#99FFFF00</color>
+    <color name="agriperizia_dark_green">#339933</color>
 </resources>

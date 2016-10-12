@@ -46,6 +46,8 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 	public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
 		FrameLayout frameLayout = (FrameLayout)super.onCreateView(inflater, viewGroup, bundle);
 
+        //todo remove
+        /*
         Button button = new Button(viewGroup.getContext());
         button.setText("CALCOLA");
         button.setOnClickListener(new View.OnClickListener() {
@@ -59,6 +61,7 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
             }
         });
         frameLayout.addView(button, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        */
 
 		mMapFragment.setOnMarkerDragListener(this);
 		mMapFragment.setOnMarkerClickListener(this);

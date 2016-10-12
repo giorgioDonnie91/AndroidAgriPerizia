@@ -86,6 +86,12 @@ public class ComunicazioneConServerThread extends Thread{
         return new Post(BASE_URL + "newPercorso.php", parameter);
     }
 
+    public static Request selectSinistriByCodicePolizzaRequest(String codicePolizza){
+        LinkedList<NameValuePair> parameter = new LinkedList<>();
+        parameter.add(new NameValuePair("CodPZ", codicePolizza));
+        return new Get(BASE_URL + "getSinistriByCodPZ.php", parameter);
+    }
+
     public static Request uploadPhotoRequest(String codicePercorso, int index){
         return null;
         //return new MultiPart(BASE_URL + "testFoto.php", new FilePart(new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Download/images.jpg"), "userfile"));

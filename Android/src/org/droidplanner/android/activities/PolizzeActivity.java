@@ -1,18 +1,22 @@
 package org.droidplanner.android.activities;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.droidplanner.android.Sinistro;
+import org.droidplanner.android.fragments.SearchToolFragment;
 import org.droidplanner.android.network.ComunicazioneConServerThread;
 import org.droidplanner.android.Polizza;
 import org.droidplanner.android.R;
@@ -26,31 +30,63 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class PolizzeActivity extends AppCompatActivity {
+public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFragment.SearchToolListener{
 
-    EditText cercaIDClienteEditText;
     TextView polizzeTotTextView;
     PolizzeAdapter polizzeAdapter;
+    ProgressBar progressBar;
+
+
+    private FragmentManager fragmentManager;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected int getToolbarId() {
+        return R.id.actionbar_container;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        fragmentManager = getSupportFragmentManager();
+
         super.onCreate(savedInstanceState);
 
         polizzeAdapter = new PolizzeAdapter();
 
         setContentView(R.layout.activity_polizze);
-        cercaIDClienteEditText = (EditText)findViewById(R.id.id_cliente_edit_text);
-        polizzeTotTextView = (TextView)findViewById(R.id.polizze_tot_text_view);
+        polizzeTotTextView = new TextView(this);
+        polizzeTotTextView.setPadding(0, (int)getResources().getDimension(R.dimen.vertical_margin), 0, 0);
         ListView polizzeListView = (ListView)findViewById(R.id.polizze_list_view);
+        polizzeListView.addHeaderView(polizzeTotTextView);
         polizzeListView.setAdapter(polizzeAdapter);
+        progressBar = (ProgressBar)findViewById(R.id.progress_bar);
     }
 
-    public void cercaPolizze(View view){
-        String idCliente = cercaIDClienteEditText.getText().toString();
-        if(TextUtils.isEmpty(idCliente))
+    @Override
+    protected int getNavigationDrawerMenuItemId() {
+        return R.id.navigation_editor;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
+
+    @Override
+    protected void addToolbarFragment(){
+        final int toolbarId = getToolbarId();
+        SearchToolFragment searchToolFragment = (SearchToolFragment) fragmentManager.findFragmentById(toolbarId);
+        if (searchToolFragment == null) {
+            searchToolFragment = new SearchToolFragment();
+            fragmentManager.beginTransaction().add(toolbarId, searchToolFragment).commit();
+        }
+    }
+
+    @Override
+    public void onSearch(String search) {
+        if(TextUtils.isEmpty(search))
             return;
 
-        Request cercaPolizzeReq = ComunicazioneConServerThread.selectPolizzeByCodiceClienteRequest(idCliente);
+        Request cercaPolizzeReq = ComunicazioneConServerThread.selectPolizzeByCodiceClienteRequest(search);
         new ComunicazioneConServerThread(
                 cercaPolizzeReq,
                 new ComunicazioneConServerThread.RequestListener() {
@@ -69,14 +105,16 @@ public class PolizzeActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        progressBar.setVisibility(View.GONE);
                     }
 
                     @Override
                     public void onError(int responseCode, String response) {
-
+                        progressBar.setVisibility(View.GONE);
                     }
                 }
         ).start();
+        progressBar.setVisibility(View.VISIBLE);
     }
 
 
@@ -127,7 +165,7 @@ public class PolizzeActivity extends AppCompatActivity {
                 e.printStackTrace();
                 dataTextView.setText(outputDateFormat.format("-"));
             }
-            convertView.setOnClickListener(new PolizzaClickListener(polizza));
+            convertView.setOnClickListener(new PolizzaClickListener(convertView, polizza));
 
             return convertView;
         }
@@ -138,9 +176,11 @@ public class PolizzeActivity extends AppCompatActivity {
     private class PolizzaClickListener implements View.OnClickListener{
 
         private Polizza polizza;
+        private View clickedView;
 
-        public PolizzaClickListener(Polizza polizza) {
+        public PolizzaClickListener(View clickedView, Polizza polizza) {
             this.polizza = polizza;
+            this.clickedView = clickedView;
         }
 
         @Override
@@ -157,6 +197,9 @@ public class PolizzeActivity extends AppCompatActivity {
                                 JSONArray percorsiJSON = responseJSON.optJSONArray("percorsi");
                                 if(percorsiJSON.length() == 0) {
                                     startActivity(new Intent(PolizzeActivity.this, EditorActivity.class));
+                                    progressBar.setVisibility(View.GONE);
+                                } else {
+                                    cercaSinistri(polizza.getCodice());
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -165,12 +208,63 @@ public class PolizzeActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(int responseCode, String response) {
-
+                            progressBar.setVisibility(View.GONE);
                         }
                     }
             ).start();
+            progressBar.setVisibility(View.VISIBLE);
         }
+
+
+        private void cercaSinistri(String codicePolizza) {
+            Request cercaSinistriReq = ComunicazioneConServerThread.selectSinistriByCodicePolizzaRequest(codicePolizza);
+            new ComunicazioneConServerThread(
+                    cercaSinistriReq,
+                    new ComunicazioneConServerThread.RequestListener() {
+                        @Override
+                        public void onSuccess(String response) {
+                            try {
+                                Log.d("SINISTRI", response);
+                                JSONObject responseJSON = new JSONObject(response);
+                                JSONArray sinistriJSON = responseJSON.getJSONArray("sinistri");
+                                for(int i=0; i<sinistriJSON.length(); i++){
+                                    Sinistro sinistro = new Sinistro(sinistriJSON.optJSONObject(i));
+                                    addViewSinistro((LinearLayout)clickedView.findViewById(R.id.contenitore_sinistri), sinistro);
+                                }
+                                //todo scaricare waypoint
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            progressBar.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onError(int responseCode, String response) {
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    }
+            ).start();
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
     }
 
+    private void addViewSinistro(LinearLayout parent, Sinistro sinistro){
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        View sinistroView = layoutInflater.inflate(R.layout.sinistro_layout, parent, false);
+
+        SimpleDateFormat inputDateFormat = new SimpleDateFormat("ddMMyyyy");
+        SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date dataPolizza = inputDateFormat.parse(sinistro.getDataSinistro());
+            ((TextView)sinistroView.findViewById(R.id.data_sinistro)).setText(outputDateFormat.format(dataPolizza));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            ((TextView)sinistroView.findViewById(R.id.data_sinistro)).setText(outputDateFormat.format("-"));
+        }
+        ((TextView)sinistroView.findViewById(R.id.codice_sinistro)).setText(sinistro.getCodice());
+        parent.addView(sinistroView, -1, params);
+    }
 
 }

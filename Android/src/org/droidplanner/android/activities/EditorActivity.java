@@ -405,7 +405,7 @@ public class EditorActivity extends DrawerNavigationUI implements
     private void setupTool() {
         final EditorToolsImpl toolImpl = getToolImpl();
         toolImpl.setup();
-        editorListFragment.enableDeleteMode(toolImpl.getEditorTools() == EditorTools.TRASH);
+        editorListFragment.enableDeleteMode(false);
     }
 
     @Override
@@ -532,11 +532,7 @@ public class EditorActivity extends DrawerNavigationUI implements
             removeItemDetail();
         } else {
             itemDetailToggle.setVisibility(View.VISIBLE);
-            if (getTool() == EditorTools.SELECTOR)
-                removeItemDetail();
-            else {
-                showItemDetail(selectMissionDetailType(selected));
-            }
+            showItemDetail(selectMissionDetailType(selected));
         }
 
         if (planningMapFragment != null)

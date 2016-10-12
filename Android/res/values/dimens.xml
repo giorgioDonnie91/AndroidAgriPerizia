@@ -64,4 +64,14 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="padding_elemento_lista">16dp</dimen>
+    <dimen name="logo_dimension">100dp</dimen>
+    <dimen name="logo_padding">20dp</dimen>
+    <dimen name="username_horizontal_padding">50dp</dimen>
+    <dimen name="field_horizontal_margin">50dp</dimen>
+    <dimen name="field_padding">10dp</dimen>
+    <dimen name="big_margin_top">50dp</dimen>
+    <dimen name="little_margin">10dp</dimen>
+    <dimen name="search_button_vertical_padding">10dp</dimen>
+    <dimen name="header_padding">10dp</dimen>
+    <dimen name="search_button_height">30dp</dimen>
 </resources>

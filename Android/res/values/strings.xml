@@ -624,6 +624,9 @@
     <string name="baidu_map_sdk_initializer_network_error_message">BaiduMap: Network error!</string>
     <string name="id_cliente_edit_text_hint">Client ID</string>
     <string name="cerca_polizze_button_text">Search</string>
+    <string name="agriperizia">agriperizia</string>
+    <string name="login">Log in</string>
+    <string name="server_sync">Upload perizie</string>
     <plurals name="polizze_tot_string">
         <item quantity="one">%1$s result</item>
         <item quantity="other">%1$s results</item>

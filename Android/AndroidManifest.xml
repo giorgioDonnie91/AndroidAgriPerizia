@@ -85,8 +85,9 @@
         </activity>
 
         <activity
-            android:name=".activities.PolizzeActivity"
-            android:launchMode="singleTask">
+            android:name=".activities.LoginActivity"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
 
             <!-- Launcher Intent -->
             <intent-filter>
@@ -94,6 +95,11 @@
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activities.PolizzeActivity"
+            android:launchMode="singleTask">
         </activity>
 
         <activity

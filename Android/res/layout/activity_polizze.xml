@@ -4,39 +4,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.droidplanner.android.activities.PolizzeActivity">
+    tools:context="org.droidplanner.android.activities.PolizzeActivity"
+    android:background="@color/agriperizia_dark_green">
 
-    <EditText
-        android:id="@+id/id_cliente_edit_text"
+    <include
+        layout="@layout/actionbar_toolbar"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/cerca_polizze_button"
-        android:maxLines="1"
-        android:drawableLeft="@android:drawable/ic_menu_search"
-        android:hint="@string/id_cliente_edit_text_hint"/>
-
-    <Button
-        android:id="@+id/cerca_polizze_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:maxLines="1"
-        android:text="@string/cerca_polizze_button_text"
-        android:onClick="cercaPolizze"/>
-
-    <TextView
-        android:id="@+id/polizze_tot_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/id_cliente_edit_text"
-        android:background="@android:color/darker_gray"
-        android:textColor="@android:color/white"
-        android:paddingLeft="10dp"/>
+        android:id="@+id/actionbar_container"/>
 
     <ListView
         android:id="@+id/polizze_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/polizze_tot_text_view"/>
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:layout_below="@id/actionbar_container"
+        android:listSelector="@android:color/transparent"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@drawable/spacer"
+        android:scrollbars="none"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@android:style/Widget.ProgressBar.Small"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>
