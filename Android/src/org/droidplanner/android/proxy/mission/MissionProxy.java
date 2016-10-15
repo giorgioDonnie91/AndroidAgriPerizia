@@ -303,6 +303,11 @@ public class MissionProxy implements DPMap.PathSource {
         addMissionItem(spatialItem);
     }
 
+    public void mAddWaypoints(List<Waypoint> waypoints){
+        for(Waypoint waypoint : waypoints)
+            addMissionItem(waypoint);
+    }
+
     /**
      * Add a waypoint generated around the passed 2D point.
      *

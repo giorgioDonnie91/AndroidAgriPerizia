@@ -471,18 +471,27 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
     }
 
     @Override
-    public void updateWrapperPercorso(WrapperPercorso wrapperPercorso) {
+    public void updateWrapperPercorso(final WrapperPercorso wrapperPercorso) {
         if(wrapperPercorsoPoly == null) {
-            PolygonOptions pathOptions = new PolygonOptions();
+            final PolygonOptions pathOptions = new PolygonOptions();
             pathOptions.strokeColor(ContextCompat.getColor(getContext(), R.color.quadrilateral_stroke_color))
                     .add(wrapperPercorso.getVerticesArray())
                     .strokeWidth(CIRCLE_STROKE_WIDTH)
                     .fillColor(ContextCompat.getColor(getContext(), R.color.quadrilateral_area_color));
 
-            wrapperPercorsoPoly = getMap().addPolygon(pathOptions);
+            getMapAsync(
+                    new OnMapReadyCallback() {
+                        @Override
+                        public void onMapReady(GoogleMap googleMap) {
+                            wrapperPercorsoPoly = googleMap.addPolygon(pathOptions);
+                            wrapperPercorsoPoly.setPoints(wrapperPercorso.getVertices());
+                        }
+                    }
+            );
+        } else {
+            wrapperPercorsoPoly.setPoints(wrapperPercorso.getVertices());
         }
 
-        wrapperPercorsoPoly.setPoints(wrapperPercorso.getVertices());
     }
 
     @Override
