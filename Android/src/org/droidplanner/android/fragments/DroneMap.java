@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.o3dr.android.client.Drone;
+import com.o3dr.android.client.apis.ExperimentalApi;
+import com.o3dr.android.client.apis.solo.SoloCameraApi;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
 import com.o3dr.services.android.lib.drone.attribute.AttributeType;
@@ -58,6 +60,7 @@ public abstract class DroneMap extends ApiListenerFragment {
 		eventFilter.addAction(AttributeEvent.ATTITUDE_UPDATED);
 		eventFilter.addAction(AttributeEvent.HOME_UPDATED);
         eventFilter.addAction(ACTION_UPDATE_MAP);
+        eventFilter.addAction(AttributeEvent.MISSION_ITEM_REACHED);
 	}
 
     private static final List<MarkerInfo> NO_EXTERNAL_MARKERS = Collections.emptyList();
@@ -126,6 +129,10 @@ public abstract class DroneMap extends ApiListenerFragment {
                     }
                     break;
                 }
+
+                case AttributeEvent.MISSION_ITEM_REACHED:
+                    SoloCameraApi.getApi(getDrone()).takePhoto(null);
+                    break;
             }
 		}
 	};

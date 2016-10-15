@@ -174,7 +174,7 @@ android {
     productFlavors {
         dev {
             applicationIdSuffix ".debug"
-            resValue "string", "app_title", "Tower Dev"
+            resValue "string", "app_title", "agriperizia"
             versionName generateVersionName(versionPrefix, versionMajor, versionMinor, versionPatch, "debug.${versionBuild}")
 
             //Enable or disable crashlytics based on the availability of the api key

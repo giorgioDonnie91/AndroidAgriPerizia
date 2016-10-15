@@ -50,7 +50,7 @@
         android:name=".DroidPlannerApp"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/agricolture"
         android:label="@string/app_title"
         android:theme="@style/CustomActionBarTheme"
         android:windowSoftInputMode="adjustPan">

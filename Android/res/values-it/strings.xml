@@ -274,4 +274,22 @@
         <item quantity="one">%1$s polizza</item>
         <item quantity="other">%1$s polizze</item>
     </plurals>
+
+    <string name="speak_mission_sent">Waypoint inviati al drone</string>
+    <string name="speak_mission_received">Waypoint ricevuti</string>
+    <string name="speak_heartbeat_first">Collegato</string>
+    <string name="speak_heartbeat_timeout">Collegamento perso, controlla la connessione.</string>
+    <string name="speak_heartbeat_restored">Collegamento ristabilito</string>
+    <string name="speak_mission_item_updated">Direzione waypoint %d</string>
+    <string name="speak_follow_start">Modalità: seguimi</string>
+    <string name="speak_warning_signal_weak">Attenzione, segnale debole</string>
+    <string name="speak_warning_no_gps">Errore, nessun segnale gsp</string>
+    <string name="speak_warning_vehicle_home_updated">Base aggiornata</string>
+    <string name="speak_warning_max_alt_exceed">Attenzione, superata altezza massima!</string>
+    <string name="speak_disconected">Scollegato</string>
+    <string name="speak_armed">Attivato</string>
+    <string name="speak_disarmed">Disattivato</string>
+    <string name="speak_battery_notification">Batteria al %d%%</string>
+    <string name="speak_connected">Collegato</string>
+
 </resources>

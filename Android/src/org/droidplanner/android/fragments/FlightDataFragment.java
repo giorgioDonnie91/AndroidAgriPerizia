@@ -23,9 +23,11 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.o3dr.android.client.Drone;
+import com.o3dr.android.client.apis.solo.SoloCameraApi;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEventExtra;
 import com.o3dr.services.android.lib.drone.attribute.error.ErrorType;
+import com.o3dr.services.android.lib.model.AbstractCommandListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.droidplanner.android.R;
@@ -107,8 +109,6 @@ public class FlightDataFragment extends ApiListenerFragment implements SlidingDr
                     if (dronieBearing != -1)
                         updateMapBearing(dronieBearing);
                     break;
-
-
             }
         }
     };
