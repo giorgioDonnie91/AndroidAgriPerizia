@@ -35,6 +35,7 @@ import org.droidplanner.android.proxy.mission.MissionProxy;
 import org.droidplanner.android.utils.Utils;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 import org.droidplanner.android.utils.prefs.DroidPlannerPrefs;
+import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
 
 import java.util.ArrayList;
 import java.util.Collections;

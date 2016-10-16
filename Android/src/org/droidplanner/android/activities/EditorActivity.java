@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -19,11 +20,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.maps.model.LatLng;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
 import com.o3dr.services.android.lib.drone.mission.MissionItemType;
+import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 
 import org.beyene.sius.unit.length.LengthUnit;
+import org.droidplanner.android.Compilatore;
 import org.droidplanner.android.R;
 import org.droidplanner.android.activities.interfaces.OnEditorInteraction;
 import org.droidplanner.android.dialogs.SupportEditInputDialog;
@@ -34,6 +38,7 @@ import org.droidplanner.android.fragments.EditorMapFragment;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsFragment;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsFragment.EditorTools;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsImpl;
+import org.droidplanner.android.network.ComunicazioneConServerThread;
 import org.droidplanner.android.proxy.mission.MissionProxy;
 import org.droidplanner.android.proxy.mission.MissionSelection;
 import org.droidplanner.android.proxy.mission.item.MissionItemProxy;
@@ -43,6 +48,7 @@ import org.droidplanner.android.utils.file.FileStream;
 import org.droidplanner.android.utils.file.IO.MissionReader;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -63,6 +69,8 @@ public class EditorActivity extends DrawerNavigationUI implements
     private static final String ITEM_DETAIL_TAG = "Item Detail Window";
 
     private static final String EXTRA_OPENED_MISSION_FILENAME = "extra_opened_mission_filename";
+    public static final String EXTRA_CODICE_POLIZZA = "extra_codice_polizza";
+    public static final String EXTRA_FIRST = "extra_first";
 
     private static final IntentFilter eventFilter = new IntentFilter();
     private static final String MISSION_FILENAME_DIALOG_TAG = "Mission filename";
@@ -116,6 +124,8 @@ public class EditorActivity extends DrawerNavigationUI implements
     private FloatingActionButton itemDetailToggle;
     private EditorListFragment editorListFragment;
     private EditorMapFragment planningMapFragment;
+    private String codicePolizza;
+    private boolean primaPerizia;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -151,6 +161,11 @@ public class EditorActivity extends DrawerNavigationUI implements
 
         if (savedInstanceState != null) {
             openedMissionFilename = savedInstanceState.getString(EXTRA_OPENED_MISSION_FILENAME);
+            codicePolizza = savedInstanceState.getString(EXTRA_CODICE_POLIZZA);
+            primaPerizia = savedInstanceState.getBoolean(EXTRA_FIRST);
+        } else {
+            codicePolizza = getIntent().getExtras().getString(EXTRA_CODICE_POLIZZA);
+            primaPerizia = getIntent().getExtras().getBoolean(EXTRA_FIRST);
         }
 
         // Retrieve the item detail fragment using its tag
@@ -174,6 +189,47 @@ public class EditorActivity extends DrawerNavigationUI implements
             return;
 
         itemDetailToggle.setActivated(isOpened);
+    }
+
+    public boolean isPrimaPerizia() {
+        return primaPerizia;
+    }
+
+    public String getCodicePolizza() {
+        return codicePolizza;
+    }
+
+    public void generaPercorso(){
+        ArrayList<LatLng> vertices = planningMapFragment.getWrapperPercorso().getVertices();
+        final List<Waypoint> waypoints = Compilatore.generaItinerario(vertices);
+        new ComunicazioneConServerThread(
+                ComunicazioneConServerThread.createPercorso(codicePolizza),
+                new ComunicazioneConServerThread.RequestListener() {
+                    @Override
+                    public void onSuccess(String response) {
+                        Log.i("Creazione percorso", "Successo");
+                        new ComunicazioneConServerThread(
+                                ComunicazioneConServerThread.createWayPoints(response, waypoints),
+                                new ComunicazioneConServerThread.RequestListener() {
+                                    @Override
+                                    public void onSuccess(String response) {
+                                        Log.i("Creazione waypoints", "Successo");
+                                    }
+
+                                    @Override
+                                    public void onError(int responseCode, String response) {
+                                        Log.i("Creazione waypoints", "Errore: " + response);
+                                    }
+                                }).start();
+                    }
+
+                    @Override
+                    public void onError(int responseCode, String response) {
+                        Log.i("Creazione percorso", "Errore: " + response);
+                    }
+                }
+        ).start();
+        missionProxy.mAddWaypoints(waypoints);
     }
 
     @Override
@@ -262,6 +318,8 @@ public class EditorActivity extends DrawerNavigationUI implements
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(EXTRA_OPENED_MISSION_FILENAME, openedMissionFilename);
+        outState.putString(EXTRA_CODICE_POLIZZA, codicePolizza);
+        outState.putBoolean(EXTRA_FIRST, primaPerizia);
     }
 
     @Override

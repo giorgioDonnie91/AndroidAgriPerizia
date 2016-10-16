@@ -196,7 +196,10 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
                                 JSONObject responseJSON = new JSONObject(response);
                                 JSONArray percorsiJSON = responseJSON.optJSONArray("percorsi");
                                 if(percorsiJSON.length() == 0) {
-                                    startActivity(new Intent(PolizzeActivity.this, EditorActivity.class));
+                                    Intent intent = new Intent(PolizzeActivity.this, EditorActivity.class);
+                                    intent.putExtra(EditorActivity.EXTRA_CODICE_POLIZZA, polizza.getCodice());
+                                    intent.putExtra(EditorActivity.EXTRA_FIRST, true);
+                                    startActivity(intent);
                                     progressBar.setVisibility(View.GONE);
                                 } else {
                                     cercaSinistri(polizza.getCodice());
@@ -231,7 +234,6 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
                                     Sinistro sinistro = new Sinistro(sinistriJSON.optJSONObject(i));
                                     addViewSinistro((LinearLayout)clickedView.findViewById(R.id.contenitore_sinistri), sinistro);
                                 }
-                                //todo scaricare waypoint
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -249,11 +251,19 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
 
     }
 
-    private void addViewSinistro(LinearLayout parent, Sinistro sinistro){
+    private void addViewSinistro(LinearLayout parent, final Sinistro sinistro){
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         View sinistroView = layoutInflater.inflate(R.layout.sinistro_layout, parent, false);
-
+        sinistroView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PolizzeActivity.this, EditorActivity.class);
+                intent.putExtra(EditorActivity.EXTRA_CODICE_POLIZZA, sinistro.getCodicePolizza());
+                intent.putExtra(EditorActivity.EXTRA_FIRST, false);
+                startActivity(intent);
+            }
+        });
         SimpleDateFormat inputDateFormat = new SimpleDateFormat("ddMMyyyy");
         SimpleDateFormat outputDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         try {

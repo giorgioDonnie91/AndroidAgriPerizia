@@ -1,35 +1,38 @@
 package org.droidplanner.android.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeType;
-import com.o3dr.services.android.lib.drone.mission.MissionItemType;
 import com.o3dr.services.android.lib.drone.mission.item.MissionItem;
-import com.o3dr.services.android.lib.drone.mission.item.spatial.BaseSpatialItem;
+import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 import com.o3dr.services.android.lib.drone.property.Home;
 
-import org.droidplanner.android.Compilatore;
-import org.droidplanner.android.R;
+import org.droidplanner.android.WaypointUtils;
+import org.droidplanner.android.activities.EditorActivity;
 import org.droidplanner.android.activities.interfaces.OnEditorInteraction;
 import org.droidplanner.android.maps.DPMap;
 import org.droidplanner.android.maps.MarkerInfo;
+import org.droidplanner.android.network.ComunicazioneConServerThread;
 import org.droidplanner.android.proxy.mission.item.markers.MissionItemMarkerInfo;
 import org.droidplanner.android.proxy.mission.item.markers.PolygonMarkerInfo;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
 import org.droidplanner.android.wrapperPercorso.WrapperPercorsoMarkerInfo;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,23 +47,67 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 
 	private OnEditorInteraction editorListener;
 
-	@Override
+    public WrapperPercorso getWrapperPercorso() {
+        return wrapperPercorso;
+    }
+
+    @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup viewGroup, Bundle bundle) {
 		View view = super.onCreateView(inflater, viewGroup, bundle);
-
-        Button button = (Button)view.findViewById(R.id.calcola);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ArrayList<LatLng> vertices = wrapperPercorso.getVertices();
-                missionProxy.mAddWaypoints(Compilatore.generaItinerario(vertices));
-            }
-        });
 
         mMapFragment.setOnMarkerDragListener(this);
 		mMapFragment.setOnMarkerClickListener(this);
 		mMapFragment.setOnMapClickListener(this);
 		mMapFragment.setOnMapLongClickListener(this);
+
+        if(!((EditorActivity)getActivity()).isPrimaPerizia()){
+            new ComunicazioneConServerThread(
+                    ComunicazioneConServerThread.selectPercorsiByCodicePolizzaRequest(((EditorActivity) getActivity()).getCodicePolizza()),
+                    new ComunicazioneConServerThread.RequestListener() {
+                        @Override
+                        public void onSuccess(String response) {
+                            try {
+                                Log.d("PERCORSI", response);
+                                JSONObject responseJSON = new JSONObject(response);
+                                JSONArray percorsiJSON = responseJSON.optJSONArray("percorsi");
+
+                                new ComunicazioneConServerThread(
+                                        ComunicazioneConServerThread.selectWaypoints(percorsiJSON.getJSONObject(0).getString("CodPR")),
+                                        new ComunicazioneConServerThread.RequestListener() {
+                                            @Override
+                                            public void onSuccess(String response) {
+                                                try {
+                                                    Log.d("WAYPOINTS", response);
+                                                    JSONObject responseJSON = new JSONObject(response);
+                                                    JSONArray waypointsJSON = responseJSON.optJSONArray("wp");
+                                                    ArrayList<Waypoint> waypoints = new ArrayList<>();
+                                                    for(int i=0; i<waypointsJSON.length(); i++){
+                                                        waypoints.add(WaypointUtils.jsonToWaypoint(waypointsJSON.getJSONObject(i)));
+                                                    }
+                                                    missionProxy.mAddWaypoints(waypoints);
+                                                } catch(JSONException e){
+                                                    e.printStackTrace();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onError(int responseCode, String response) {
+                                                Log.d("WAYPOINTS", "ERROR");
+                                            }
+                                        }
+                                ).start();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onError(int responseCode, String response) {
+                            Log.d("PERCORSI", "ERRORE");
+                        }
+                    }
+            ).start();
+        }
 
 		return view;
 	}
@@ -215,7 +262,7 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 
     @Override
     public void onLocationChanged(Location location) {
-        if(wrapperPercorso != null)
+        if(wrapperPercorso != null || !((EditorActivity)getActivity()).isPrimaPerizia())
             return;
 
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
@@ -249,6 +296,5 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 
         return vertices;
     }
-
 
 }

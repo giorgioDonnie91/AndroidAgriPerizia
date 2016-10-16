@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
 
 import org.droidplanner.android.R;
+import org.droidplanner.android.activities.EditorActivity;
 import org.droidplanner.android.dialogs.SupportYesNoDialog;
 import org.droidplanner.android.fragments.helpers.ApiListenerFragment;
 import org.droidplanner.android.proxy.mission.MissionProxy;
@@ -179,12 +180,14 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
             @Override
             public void onClick(View v) {
                 setTool(EditorTools.NONE);
-
+                /*
                 if (mMissionProxy.canUndoMission())
                     mMissionProxy.undoMission();
                 else {
                     Toast.makeText(getContext(), "No operation left to undo.", Toast.LENGTH_SHORT).show();
                 }
+                */
+                ((EditorActivity)getActivity()).generaPercorso();
             }
         });
 

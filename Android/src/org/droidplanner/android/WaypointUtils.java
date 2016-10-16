@@ -4,6 +4,9 @@ package org.droidplanner.android;
 import com.o3dr.services.android.lib.coordinate.LatLongAlt;
 import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +17,7 @@ public class WaypointUtils {
     public static Waypoint newWaypoint(double latitude, double longitude){
         Waypoint waypoint = new Waypoint();
         waypoint.setCoordinate(new LatLongAlt(latitude, longitude, DEFAULT_ALTITUDE));
+        waypoint.setDelay(2);
         return waypoint;
     }
 
@@ -61,6 +65,28 @@ public class WaypointUtils {
         }
 
         return waypoints;
+    }
+
+    public static JSONObject waypointToJSON(Waypoint waypoint) throws JSONException {
+        JSONObject jsonWaipoint = new JSONObject();
+        jsonWaipoint.put("Altezza", waypoint.getCoordinate().getAltitude());
+        jsonWaipoint.put("Latitudine", waypoint.getCoordinate().getLatitude());
+        jsonWaipoint.put("Longitudine", waypoint.getCoordinate().getLongitude());
+        jsonWaipoint.put("TimeOut", waypoint.getDelay());
+        return jsonWaipoint;
+    }
+
+    public static Waypoint jsonToWaypoint(JSONObject jsonWaipoint) throws JSONException {
+        Waypoint waypoint = new Waypoint();
+        waypoint.setCoordinate(
+                new LatLongAlt(
+                        jsonWaipoint.getDouble("Latitudine"),
+                        jsonWaipoint.getDouble("Longitudine"),
+                        jsonWaipoint.getDouble("Altezza")
+                )
+        );
+        waypoint.setDelay(jsonWaipoint.getDouble("TimeOut"));
+        return waypoint;
     }
 
 }
