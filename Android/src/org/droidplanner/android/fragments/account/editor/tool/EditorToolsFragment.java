@@ -301,6 +301,7 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
     private void updateSubToolsVisibility() {
         hideSubTools();
         switch (tool) {
+            /*
             case SELECTOR:
                 editorSubTools.setVisibility(View.VISIBLE);
                 selectAll.setVisibility(View.VISIBLE);
@@ -315,7 +316,7 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
                 editorSubTools.setVisibility(View.VISIBLE);
                 markerItemsSpinner.setVisibility(View.VISIBLE);
                 break;
-
+            */
             default:
                 hideSubTools();
                 break;

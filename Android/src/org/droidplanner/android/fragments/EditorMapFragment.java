@@ -1,7 +1,6 @@
 package org.droidplanner.android.fragments;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
@@ -264,7 +263,7 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
     public void onLocationChanged(Location location) {
         if(wrapperPercorso != null || !((EditorActivity)getActivity()).isPrimaPerizia())
             return;
-
+        Log.i("location", "editor fragment");
         LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
         wrapperPercorso = new WrapperPercorso(getMaxSquare(position));
         mMapFragment.updateWrapperPercorso(wrapperPercorso);

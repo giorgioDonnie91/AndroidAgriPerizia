@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -169,6 +170,8 @@ public class GoogleMapFragment extends SupportMapFragment implements DPMap, Goog
         @Override
         public void onLocationResult(LocationResult result) {
             super.onLocationResult(result);
+
+            Log.i("location", "google map fragment");
 
             Location location = result.getLastLocation();
             final LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
