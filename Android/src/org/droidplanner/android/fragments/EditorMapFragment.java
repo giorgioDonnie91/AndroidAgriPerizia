@@ -23,9 +23,10 @@ import org.droidplanner.android.activities.EditorActivity;
 import org.droidplanner.android.activities.interfaces.OnEditorInteraction;
 import org.droidplanner.android.maps.DPMap;
 import org.droidplanner.android.maps.MarkerInfo;
-import org.droidplanner.android.network.ComunicazioneConServerThread;
+import org.droidplanner.android.network.ComunicazioneConServerRunnable;
 import org.droidplanner.android.proxy.mission.item.markers.MissionItemMarkerInfo;
 import org.droidplanner.android.proxy.mission.item.markers.PolygonMarkerInfo;
+import org.droidplanner.android.utils.Utils;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
 import org.droidplanner.android.wrapperPercorso.WrapperPercorsoMarkerInfo;
@@ -60,9 +61,9 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 		mMapFragment.setOnMapLongClickListener(this);
 
         if(!((EditorActivity)getActivity()).isPrimaPerizia()){
-            new ComunicazioneConServerThread(
-                    ComunicazioneConServerThread.selectPercorsiByCodicePolizzaRequest(((EditorActivity) getActivity()).getCodicePolizza()),
-                    new ComunicazioneConServerThread.RequestListener() {
+            new Thread(new ComunicazioneConServerRunnable(
+                    ComunicazioneConServerRunnable.selectPercorsiByCodicePolizzaRequest(((EditorActivity) getActivity()).getCodicePolizza()),
+                    new ComunicazioneConServerRunnable.RequestListener() {
                         @Override
                         public void onSuccess(String response) {
                             try {
@@ -70,9 +71,12 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
                                 JSONObject responseJSON = new JSONObject(response);
                                 JSONArray percorsiJSON = responseJSON.optJSONArray("percorsi");
 
-                                new ComunicazioneConServerThread(
-                                        ComunicazioneConServerThread.selectWaypoints(percorsiJSON.getJSONObject(0).getString("CodPR")),
-                                        new ComunicazioneConServerThread.RequestListener() {
+                                String codicePercorso = percorsiJSON.getJSONObject(0).getString("CodPR");
+                                Utils.savePreferencesData(getActivity(), Utils.PREF_PERCORSO, codicePercorso);
+
+                                new Thread(new ComunicazioneConServerRunnable(
+                                        ComunicazioneConServerRunnable.selectWaypoints(codicePercorso),
+                                        new ComunicazioneConServerRunnable.RequestListener() {
                                             @Override
                                             public void onSuccess(String response) {
                                                 try {
@@ -94,7 +98,7 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
                                                 Log.d("WAYPOINTS", "ERROR");
                                             }
                                         }
-                                ).start();
+                                )).start();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -105,7 +109,7 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
                             Log.d("PERCORSI", "ERRORE");
                         }
                     }
-            ).start();
+            )).start();
         }
 
 		return view;

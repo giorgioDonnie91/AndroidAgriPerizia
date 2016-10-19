@@ -14,15 +14,18 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.o3dr.android.client.Drone;
-import com.o3dr.android.client.apis.ExperimentalApi;
-import com.o3dr.android.client.apis.solo.SoloCameraApi;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
+import com.o3dr.services.android.lib.drone.attribute.AttributeEventExtra;
 import com.o3dr.services.android.lib.drone.attribute.AttributeType;
+import com.o3dr.services.android.lib.drone.mission.MissionItemType;
+import com.o3dr.services.android.lib.drone.mission.item.MissionItem;
+import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 import com.o3dr.services.android.lib.drone.property.CameraProxy;
 import com.o3dr.services.android.lib.drone.property.Gps;
 
 import org.droidplanner.android.R;
+import org.droidplanner.android.WaypointUtils;
 import org.droidplanner.android.fragments.helpers.ApiListenerFragment;
 import org.droidplanner.android.graphic.map.GraphicDrone;
 import org.droidplanner.android.graphic.map.GraphicGuided;
@@ -35,7 +38,6 @@ import org.droidplanner.android.proxy.mission.MissionProxy;
 import org.droidplanner.android.utils.Utils;
 import org.droidplanner.android.utils.prefs.AutoPanMode;
 import org.droidplanner.android.utils.prefs.DroidPlannerPrefs;
-import org.droidplanner.android.wrapperPercorso.WrapperPercorso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +48,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class DroneMap extends ApiListenerFragment {
 
     public static final String ACTION_UPDATE_MAP = Utils.PACKAGE_NAME + ".action.UPDATE_MAP";
+    private static final int THRESHOLD = 2;
 
 	private static final IntentFilter eventFilter = new IntentFilter();
 	static {
@@ -61,10 +64,16 @@ public abstract class DroneMap extends ApiListenerFragment {
 		eventFilter.addAction(AttributeEvent.ATTITUDE_UPDATED);
 		eventFilter.addAction(AttributeEvent.HOME_UPDATED);
         eventFilter.addAction(ACTION_UPDATE_MAP);
-        eventFilter.addAction(AttributeEvent.MISSION_ITEM_REACHED);
+        eventFilter.addAction(AttributeEvent.MISSION_ITEM_UPDATED);
 	}
 
     private static final List<MarkerInfo> NO_EXTERNAL_MARKERS = Collections.emptyList();
+
+    private LatLong destinationCoordinate;
+    private double currentBestError;
+    private int destinationIndex;
+
+    private CloseToWaypointListener closeToWaypointListener;
 
     private final BroadcastReceiver eventReceiver = new BroadcastReceiver() {
 		@Override
@@ -86,6 +95,21 @@ public abstract class DroneMap extends ApiListenerFragment {
                     final Gps droneGps = drone.getAttribute(AttributeType.GPS);
                     if (droneGps != null && droneGps.isValid()) {
                         mMapFragment.addFlightPathPoint(droneGps.getPosition());
+
+                        if(destinationCoordinate != null) {
+                            double distanza = WaypointUtils.distanza(
+                                    droneGps.getPosition().getLongitude(),
+                                    droneGps.getPosition().getLatitude(),
+                                    destinationCoordinate.getLongitude(),
+                                    destinationCoordinate.getLatitude()
+                            );
+
+                            if (distanza < THRESHOLD && distanza < currentBestError && closeToWaypointListener != null) {
+                                currentBestError = distanza;
+                                closeToWaypointListener.onCloseTo(destinationIndex);
+                            }
+                        }
+
                     }
                     break;
                 }
@@ -131,9 +155,20 @@ public abstract class DroneMap extends ApiListenerFragment {
                     break;
                 }
 
-                case AttributeEvent.MISSION_ITEM_REACHED:
-                    SoloCameraApi.getApi(getDrone()).takePhoto(null);
+                case AttributeEvent.MISSION_ITEM_UPDATED:
+                    int currentDestinationIndex = intent.getIntExtra(AttributeEventExtra.EXTRA_MISSION_CURRENT_WAYPOINT, 0);
+                    if (currentDestinationIndex != 0) {
+                        //Zeroth waypoint is the home location.
+                        MissionItem currentDestination = missionProxy.getItems().get(currentDestinationIndex).getMissionItem();
+                        if(currentDestination.getType().equals(MissionItemType.WAYPOINT)){
+                            Waypoint currentWaypoint = (Waypoint)currentDestination;
+                            destinationCoordinate = currentWaypoint.getCoordinate();
+                            currentBestError = Double.MAX_VALUE;
+                            destinationIndex = currentDestinationIndex;
+                        }
+                    }
                     break;
+
             }
 		}
 	};
@@ -424,4 +459,12 @@ public abstract class DroneMap extends ApiListenerFragment {
 	public DPMap.VisibleMapArea getVisibleMapArea(){
 		return mMapFragment == null ? null : mMapFragment.getVisibleMapArea();
 	}
+
+    public void setCloseToWaypointListener(CloseToWaypointListener closeToWaypointListener) {
+        this.closeToWaypointListener = closeToWaypointListener;
+    }
+
+    public interface CloseToWaypointListener{
+        void onCloseTo(int waypointIndex);
+    }
 }

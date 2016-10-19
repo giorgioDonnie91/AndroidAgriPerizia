@@ -19,4 +19,13 @@
 
         <include layout="@layout/actionbar_toolbar"/>
     </org.droidplanner.android.view.FitsSystemWindowsFrameLayout>
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Screenshot"
+        android:onClick="screenshot"/>
+
 </FrameLayout>

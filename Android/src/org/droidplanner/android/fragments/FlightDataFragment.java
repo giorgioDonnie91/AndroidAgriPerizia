@@ -27,11 +27,11 @@ import com.o3dr.android.client.apis.solo.SoloCameraApi;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEventExtra;
 import com.o3dr.services.android.lib.drone.attribute.error.ErrorType;
-import com.o3dr.services.android.lib.model.AbstractCommandListener;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.droidplanner.android.R;
 import org.droidplanner.android.activities.DrawerNavigationUI;
+import org.droidplanner.android.activities.FlightActivity;
 import org.droidplanner.android.fragments.control.FlightControlManagerFragment;
 import org.droidplanner.android.fragments.helpers.ApiListenerFragment;
 import org.droidplanner.android.fragments.mode.FlightModePanel;
@@ -380,6 +380,8 @@ public class FlightDataFragment extends ApiListenerFragment implements SlidingDr
                 fm.beginTransaction().add(R.id.flight_map_fragment, mapFragment).commit();
             }
         }
+        if(getActivity() instanceof FlightActivity)
+            mapFragment.setCloseToWaypointListener((FlightActivity)getActivity());
     }
 
     private void updateMapLocationButtons(AutoPanMode mode) {

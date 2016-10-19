@@ -1,6 +1,7 @@
 package org.droidplanner.android.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -25,12 +26,17 @@ import timber.log.Timber;
 public class Utils {
 
     public static final String PACKAGE_NAME = "org.droidplanner.android";
+    public static final String PREF_PERCORSO = "percorso_key";
+    public static final String PREF_SINISTRO = "sinistro_key";
 
-	public static final int MIN_DISTANCE = 0; //meter
+
+    public static final int MIN_DISTANCE = 0; //meter
 	public static final int MAX_DISTANCE = 1000; // meters
 	public static final int MAX_RADIUS = 255; //meters, should be used with mission items which implement NAV_LOITER_TURNS
 
 	public static final int INVALID_APP_VERSION_CODE = -1;
+
+    private static final String PREFERENCES = "drone_pref";
 
 	/**
 	 * Used to update the user interface language.
@@ -127,6 +133,22 @@ public class Utils {
         if(input == null)
             return "";
         return input;
+    }
+
+
+
+    public static void savePreferencesData(Context context, String key, String value) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        if (value != null) {
+            editor.putString(key, value);
+            editor.commit();
+        }
+    }
+
+    public static String loadPreferencesData(Context context, String key){
+        SharedPreferences prefs = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
+        return prefs.getString(key, null);
     }
 
 	//Private constructor to prevent instantiation.

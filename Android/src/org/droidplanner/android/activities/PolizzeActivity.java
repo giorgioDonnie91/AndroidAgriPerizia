@@ -17,10 +17,11 @@ import android.widget.TextView;
 
 import org.droidplanner.android.Sinistro;
 import org.droidplanner.android.fragments.SearchToolFragment;
-import org.droidplanner.android.network.ComunicazioneConServerThread;
+import org.droidplanner.android.network.ComunicazioneConServerRunnable;
 import org.droidplanner.android.Polizza;
 import org.droidplanner.android.R;
 import org.droidplanner.android.network.request.Request;
+import org.droidplanner.android.utils.Utils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,10 +87,10 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
         if(TextUtils.isEmpty(search))
             return;
 
-        Request cercaPolizzeReq = ComunicazioneConServerThread.selectPolizzeByCodiceClienteRequest(search);
-        new ComunicazioneConServerThread(
+        Request cercaPolizzeReq = ComunicazioneConServerRunnable.selectPolizzeByCodiceClienteRequest(search);
+        new Thread(new ComunicazioneConServerRunnable(
                 cercaPolizzeReq,
-                new ComunicazioneConServerThread.RequestListener() {
+                new ComunicazioneConServerRunnable.RequestListener() {
                     @Override
                     public void onSuccess(String response) {
                         try {
@@ -113,7 +114,7 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
                         progressBar.setVisibility(View.GONE);
                     }
                 }
-        ).start();
+        )).start();
         progressBar.setVisibility(View.VISIBLE);
     }
 
@@ -185,10 +186,10 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
 
         @Override
         public void onClick(View v) {
-            Request cercaPercorsiReq = ComunicazioneConServerThread.selectPercorsiByCodicePolizzaRequest(polizza.getCodice());
-            new ComunicazioneConServerThread(
+            Request cercaPercorsiReq = ComunicazioneConServerRunnable.selectPercorsiByCodicePolizzaRequest(polizza.getCodice());
+            new Thread(new ComunicazioneConServerRunnable(
                     cercaPercorsiReq,
-                    new ComunicazioneConServerThread.RequestListener() {
+                    new ComunicazioneConServerRunnable.RequestListener() {
                         @Override
                         public void onSuccess(String response) {
                             try {
@@ -196,6 +197,7 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
                                 JSONObject responseJSON = new JSONObject(response);
                                 JSONArray percorsiJSON = responseJSON.optJSONArray("percorsi");
                                 if(percorsiJSON.length() == 0) {
+                                    Utils.savePreferencesData(PolizzeActivity.this, Utils.PREF_SINISTRO, null);
                                     Intent intent = new Intent(PolizzeActivity.this, EditorActivity.class);
                                     intent.putExtra(EditorActivity.EXTRA_CODICE_POLIZZA, polizza.getCodice());
                                     intent.putExtra(EditorActivity.EXTRA_FIRST, true);
@@ -214,16 +216,16 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
                             progressBar.setVisibility(View.GONE);
                         }
                     }
-            ).start();
+            )).start();
             progressBar.setVisibility(View.VISIBLE);
         }
 
 
         private void cercaSinistri(String codicePolizza) {
-            Request cercaSinistriReq = ComunicazioneConServerThread.selectSinistriByCodicePolizzaRequest(codicePolizza);
-            new ComunicazioneConServerThread(
+            Request cercaSinistriReq = ComunicazioneConServerRunnable.selectSinistriByCodicePolizzaRequest(codicePolizza);
+            new Thread(new ComunicazioneConServerRunnable(
                     cercaSinistriReq,
-                    new ComunicazioneConServerThread.RequestListener() {
+                    new ComunicazioneConServerRunnable.RequestListener() {
                         @Override
                         public void onSuccess(String response) {
                             try {
@@ -245,7 +247,7 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
                             progressBar.setVisibility(View.GONE);
                         }
                     }
-            ).start();
+            )).start();
             progressBar.setVisibility(View.VISIBLE);
         }
 
@@ -258,6 +260,7 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
         sinistroView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Utils.savePreferencesData(PolizzeActivity.this, Utils.PREF_SINISTRO, sinistro.getCodice());
                 Intent intent = new Intent(PolizzeActivity.this, EditorActivity.class);
                 intent.putExtra(EditorActivity.EXTRA_CODICE_POLIZZA, sinistro.getCodicePolizza());
                 intent.putExtra(EditorActivity.EXTRA_FIRST, false);

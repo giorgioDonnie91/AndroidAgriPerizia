@@ -1,9 +1,13 @@
 package org.droidplanner.android.activities;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -11,17 +15,26 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.droidplanner.android.R;
 import org.droidplanner.android.dialogs.DialogMaterialFragment;
+import org.droidplanner.android.fragments.DroneMap;
 import org.droidplanner.android.fragments.FlightDataFragment;
 import org.droidplanner.android.fragments.WidgetsListFragment;
 import org.droidplanner.android.fragments.actionbar.ActionBarTelemFragment;
+import org.droidplanner.android.fragments.widget.TowerWidgets;
+import org.droidplanner.android.fragments.widget.video.MiniWidgetSoloLinkVideo;
 import org.droidplanner.android.utils.Utils;
 
-public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanelLayout.PanelSlideListener {
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanelLayout.PanelSlideListener, DroneMap.CloseToWaypointListener {
 
     private static final String EXTRA_IS_ACTION_DRAWER_OPENED = "extra_is_action_drawer_opened";
     private static final boolean DEFAULT_IS_ACTION_DRAWER_OPENED = true;
 
     private FlightDataFragment flightData;
+
+    private int lastSaved = -1;
 
     @Override
     public void onDrawerClosed() {
@@ -185,5 +198,65 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
 
     private void resetActionDrawerBottomMargin(){
         updateActionDrawerBottomMargin((int) getResources().getDimension(R.dimen.action_drawer_margin_bottom));
+    }
+
+    @Override
+    public void onCloseTo(int waypointIndex) {
+        if(waypointIndex <= lastSaved)
+            return;
+
+        lastSaved = waypointIndex;
+
+        WidgetsListFragment widgetsListFragment = (WidgetsListFragment)getSupportFragmentManager().findFragmentById(getActionDrawerId());
+        if(widgetsListFragment == null || !widgetsListFragment.isAdded() || widgetsListFragment.getView() == null)
+            return;
+
+        MiniWidgetSoloLinkVideo miniWidgetSoloLinkVideo = (MiniWidgetSoloLinkVideo)widgetsListFragment.getWidget(TowerWidgets.SOLO_VIDEO.getIdRes());
+        if(miniWidgetSoloLinkVideo == null || !miniWidgetSoloLinkVideo.isAdded() || miniWidgetSoloLinkVideo.getView() == null)
+            return;
+
+        TextureView textureView = (TextureView)miniWidgetSoloLinkVideo.getView().findViewById(R.id.sololink_video_view);
+
+        saveBitmapAsynch(textureView.getBitmap(), waypointIndex);
+    }
+
+    public void saveBitmapAsynch(final Bitmap bitmap, final int wayPointIndex){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String codicePercorso = Utils.loadPreferencesData(FlightActivity.this, Utils.PREF_PERCORSO);
+                String codiceSinistro = Utils.loadPreferencesData(FlightActivity.this, Utils.PREF_SINISTRO);
+                String root = Environment.getExternalStorageDirectory().toString();
+                File myDir = new File(root + "/drone/"+(codiceSinistro == null ? "prima_perizia/" : codiceSinistro+"/")+codicePercorso);
+                myDir.mkdirs();
+
+                FileOutputStream out = null;
+                try {
+                    out = new FileOutputStream(myDir+"/"+wayPointIndex+".png");
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (out != null){
+                            out.flush();
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public void screenshot(View view){
+        View v = findViewById(android.R.id.content);
+        Bitmap b = Bitmap.createBitmap( v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+        v.draw(c);
+
+        saveBitmapAsynch(b, 0);
     }
 }

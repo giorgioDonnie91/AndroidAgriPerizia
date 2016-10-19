@@ -183,6 +183,10 @@ public abstract class DrawerNavigationUI extends SuperUI implements SlidingDrawe
             case R.id.navigation_settings:
                 mNavigationIntent = new Intent(this, SettingsActivity.class);
                 break;
+
+            case R.id.navigation_server_sync:
+                mNavigationIntent = new Intent(this, UploadPhotosActivity.class);
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -155,4 +155,9 @@ public class WidgetsListFragment extends Fragment {
             addWidget(widgetId);
         }
     }
+
+    public Fragment getWidget(int containerId){
+        FragmentManager fm = getChildFragmentManager();
+        return fm.findFragmentById(containerId);
+    }
 }

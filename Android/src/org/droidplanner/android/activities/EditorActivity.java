@@ -38,11 +38,12 @@ import org.droidplanner.android.fragments.EditorMapFragment;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsFragment;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsFragment.EditorTools;
 import org.droidplanner.android.fragments.account.editor.tool.EditorToolsImpl;
-import org.droidplanner.android.network.ComunicazioneConServerThread;
+import org.droidplanner.android.network.ComunicazioneConServerRunnable;
 import org.droidplanner.android.proxy.mission.MissionProxy;
 import org.droidplanner.android.proxy.mission.MissionSelection;
 import org.droidplanner.android.proxy.mission.item.MissionItemProxy;
 import org.droidplanner.android.proxy.mission.item.fragments.MissionDetailFragment;
+import org.droidplanner.android.utils.Utils;
 import org.droidplanner.android.utils.analytics.GAUtils;
 import org.droidplanner.android.utils.file.FileStream;
 import org.droidplanner.android.utils.file.IO.MissionReader;
@@ -202,15 +203,16 @@ public class EditorActivity extends DrawerNavigationUI implements
     public void generaPercorso(){
         ArrayList<LatLng> vertices = planningMapFragment.getWrapperPercorso().getVertices();
         final List<Waypoint> waypoints = Compilatore.generaItinerario(vertices);
-        new ComunicazioneConServerThread(
-                ComunicazioneConServerThread.createPercorso(codicePolizza),
-                new ComunicazioneConServerThread.RequestListener() {
+        new Thread(new ComunicazioneConServerRunnable(
+                ComunicazioneConServerRunnable.createPercorso(codicePolizza),
+                new ComunicazioneConServerRunnable.RequestListener() {
                     @Override
                     public void onSuccess(String response) {
                         Log.i("Creazione percorso", "Successo");
-                        new ComunicazioneConServerThread(
-                                ComunicazioneConServerThread.createWayPoints(response, waypoints),
-                                new ComunicazioneConServerThread.RequestListener() {
+                        Utils.savePreferencesData(EditorActivity.this, Utils.PREF_PERCORSO, response);
+                        new Thread(new ComunicazioneConServerRunnable(
+                                ComunicazioneConServerRunnable.createWayPoints(response, waypoints),
+                                new ComunicazioneConServerRunnable.RequestListener() {
                                     @Override
                                     public void onSuccess(String response) {
                                         Log.i("Creazione waypoints", "Successo");
@@ -220,7 +222,7 @@ public class EditorActivity extends DrawerNavigationUI implements
                                     public void onError(int responseCode, String response) {
                                         Log.i("Creazione waypoints", "Errore: " + response);
                                     }
-                                }).start();
+                                })).start();
                     }
 
                     @Override
@@ -228,7 +230,7 @@ public class EditorActivity extends DrawerNavigationUI implements
                         Log.i("Creazione percorso", "Errore: " + response);
                     }
                 }
-        ).start();
+        )).start();
         missionProxy.mAddWaypoints(waypoints);
     }
 

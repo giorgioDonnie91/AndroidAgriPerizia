@@ -1,36 +1,15 @@
 package org.droidplanner.android.activities
 
-import android.content.BroadcastReceiver
-import android.content.Context
+
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
-import android.support.v7.widget.Toolbar
-import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import com.o3dr.android.client.Drone
-import com.o3dr.android.client.apis.CapabilityApi
-import com.o3dr.android.client.apis.VehicleApi
-import com.o3dr.android.client.apis.solo.SoloCameraApi
-import com.o3dr.services.android.lib.coordinate.LatLong
-import com.o3dr.services.android.lib.drone.attribute.AttributeEvent
-import com.o3dr.services.android.lib.drone.attribute.AttributeType
-import com.o3dr.services.android.lib.drone.companion.solo.SoloAttributes
-import com.o3dr.services.android.lib.drone.companion.solo.SoloEvents
-import com.o3dr.services.android.lib.drone.companion.solo.tlv.SoloGoproState
 import org.droidplanner.android.R
 import org.droidplanner.android.activities.helpers.SuperUI
 import org.droidplanner.android.fragments.FlightDataFragment
-import org.droidplanner.android.fragments.FlightMapFragment
 import org.droidplanner.android.fragments.actionbar.ActionBarTelemFragment
 import org.droidplanner.android.fragments.widget.TowerWidget
 import org.droidplanner.android.fragments.widget.TowerWidgets
-import org.droidplanner.android.fragments.widget.video.FullWidgetSoloLinkVideo
-import org.droidplanner.android.utils.prefs.AutoPanMode
-import kotlin.properties.Delegates
 
 /**
  * Created by Fredia Huya-Kouadio on 7/19/15.

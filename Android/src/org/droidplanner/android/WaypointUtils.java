@@ -27,13 +27,17 @@ public class WaypointUtils {
     }
 
     public static double distanza(Waypoint start, Waypoint end) {
-        final int R = 6371;
-
         double lon1 = start.getCoordinate().getLongitude();
         double lat1 = start.getCoordinate().getLatitude();
         double lon2 = end.getCoordinate().getLongitude();
         double lat2 = end.getCoordinate().getLatitude();
 
+        return distanza(lon1, lat1, lon2, lat2);
+    }
+
+
+    public static double distanza(double lon1, double lat1, double lon2, double lat2) {
+        final int R = 6371;
         double latDistance = ((lat2-lat1)*Math.PI/180);
         double lonDistance = ((lon2-lon1)*Math.PI/180);
         double a = (Math.sin(latDistance/2)*Math.sin(latDistance/2)+Math.cos((lat1)*Math.PI/180)*Math.cos((lat2)*Math.PI/180)*Math.sin(lonDistance/2)*Math.sin(lonDistance/2));
