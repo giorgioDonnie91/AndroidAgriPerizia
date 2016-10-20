@@ -2,7 +2,6 @@ package org.droidplanner.android.activities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -17,10 +16,9 @@ import org.droidplanner.android.R;
 import org.droidplanner.android.dialogs.DialogMaterialFragment;
 import org.droidplanner.android.fragments.DroneMap;
 import org.droidplanner.android.fragments.FlightDataFragment;
-import org.droidplanner.android.fragments.WidgetsListFragment;
 import org.droidplanner.android.fragments.actionbar.ActionBarTelemFragment;
 import org.droidplanner.android.fragments.widget.TowerWidgets;
-import org.droidplanner.android.fragments.widget.video.MiniWidgetSoloLinkVideo;
+import org.droidplanner.android.fragments.widget.video.FullWidgetSoloLinkVideo;
 import org.droidplanner.android.utils.Utils;
 
 import java.io.File;
@@ -55,30 +53,29 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_flight);
+        setContentView(R.layout.activity_widget);
 
         final FragmentManager fm = getSupportFragmentManager();
 
         //Add the flight data fragment
-        flightData = (FlightDataFragment) fm.findFragmentById(R.id.flight_data_container);
+        flightData = (FlightDataFragment) fm.findFragmentById(R.id.map_view);
         if(flightData == null){
             Bundle args = new Bundle();
             args.putBoolean(FlightDataFragment.EXTRA_SHOW_ACTION_DRAWER_TOGGLE, true);
 
             flightData = new FlightDataFragment();
             flightData.setArguments(args);
-            fm.beginTransaction().add(R.id.flight_data_container, flightData).commit();
+            fm.beginTransaction().add(R.id.map_view, flightData).commit();
         }
 
-        // Add the telemetry fragment
-        final int actionDrawerId = getActionDrawerId();
-        WidgetsListFragment widgetsListFragment = (WidgetsListFragment) fm.findFragmentById(actionDrawerId);
-        if (widgetsListFragment == null) {
-            widgetsListFragment = new WidgetsListFragment();
+        Fragment videoFragment = fm.findFragmentById(R.id.widget_view);
+        if (videoFragment == null) {
+            videoFragment = TowerWidgets.SOLO_VIDEO.getMaximizedFragment();
             fm.beginTransaction()
-                    .add(actionDrawerId, widgetsListFragment)
+                    .add(R.id.widget_view, videoFragment)
                     .commit();
         }
+
 
         boolean isActionDrawerOpened = DEFAULT_IS_ACTION_DRAWER_OPENED;
         if (savedInstanceState != null) {
@@ -207,16 +204,11 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
 
         lastSaved = waypointIndex;
 
-        WidgetsListFragment widgetsListFragment = (WidgetsListFragment)getSupportFragmentManager().findFragmentById(getActionDrawerId());
-        if(widgetsListFragment == null || !widgetsListFragment.isAdded() || widgetsListFragment.getView() == null)
+        FullWidgetSoloLinkVideo fullWidgetSoloLinkVideo = (FullWidgetSoloLinkVideo)getSupportFragmentManager().findFragmentById(R.id.widget_view);
+        if(fullWidgetSoloLinkVideo == null || !fullWidgetSoloLinkVideo.isAdded() || fullWidgetSoloLinkVideo.getView() == null)
             return;
 
-        MiniWidgetSoloLinkVideo miniWidgetSoloLinkVideo = (MiniWidgetSoloLinkVideo)widgetsListFragment.getWidget(TowerWidgets.SOLO_VIDEO.getIdRes());
-        if(miniWidgetSoloLinkVideo == null || !miniWidgetSoloLinkVideo.isAdded() || miniWidgetSoloLinkVideo.getView() == null)
-            return;
-
-        TextureView textureView = (TextureView)miniWidgetSoloLinkVideo.getView().findViewById(R.id.sololink_video_view);
-
+        TextureView textureView = (TextureView)fullWidgetSoloLinkVideo.getView().findViewById(R.id.sololink_video_view);
         saveBitmapAsynch(textureView.getBitmap(), waypointIndex);
     }
 
@@ -251,6 +243,7 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
     }
 
     public void screenshot(View view){
+        /*
         View v = findViewById(android.R.id.content);
         Bitmap b = Bitmap.createBitmap( v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
@@ -258,5 +251,7 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
         v.draw(c);
 
         saveBitmapAsynch(b, 0);
+        */
+        onCloseTo(10);
     }
 }
