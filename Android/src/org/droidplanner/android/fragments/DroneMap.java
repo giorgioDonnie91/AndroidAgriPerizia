@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class DroneMap extends ApiListenerFragment {
 
     public static final String ACTION_UPDATE_MAP = Utils.PACKAGE_NAME + ".action.UPDATE_MAP";
-    private static final int THRESHOLD = 2;
+    private static final int THRESHOLD = 1;
 
 	private static final IntentFilter eventFilter = new IntentFilter();
 	static {
@@ -168,7 +168,6 @@ public abstract class DroneMap extends ApiListenerFragment {
                         }
                     }
                     break;
-
             }
 		}
 	};
