@@ -5,6 +5,8 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.droidplanner.android.R;
@@ -19,6 +21,8 @@ public class UploadPhotosActivity extends DrawerNavigationUI{
 
 
     private ProgressBar progressBar;
+    private ListView uploadedListView;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected int getToolbarId() {
@@ -31,12 +35,15 @@ public class UploadPhotosActivity extends DrawerNavigationUI{
 
         setContentView(R.layout.activity_upload_photos);
         progressBar = (ProgressBar)findViewById(R.id.progress_bar);
+        uploadedListView = (ListView)findViewById(R.id.uploaded_list_view);
+        adapter = new ArrayAdapter<>(this, R.layout.photo_file_layout, R.id.path);
+        uploadedListView.setAdapter(adapter);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 String root = Environment.getExternalStorageDirectory().toString();
-                ExecutorService executor = Executors.newFixedThreadPool(5);
+                ExecutorService executor = Executors.newFixedThreadPool(3);
                 startUpload(new File(root+"/drone"), executor);
                 executor.shutdown();
                 try {
@@ -74,10 +81,10 @@ public class UploadPhotosActivity extends DrawerNavigationUI{
         final String waypointIndex = tmp.substring(0, tmp.indexOf('.'));
 
         File parent = file.getParentFile();
-        final String codicePercorso = parent.getName();
+        final String codiceSinistro = parent.getName();
 
         parent = parent.getParentFile();
-        final String codiceSinistro = parent.getName();
+        final String codicePercorso = parent.getName();
 
 
         executor.execute(new ComunicazioneConServerRunnable(
@@ -85,6 +92,7 @@ public class UploadPhotosActivity extends DrawerNavigationUI{
                 new ComunicazioneConServerRunnable.RequestListener() {
                     @Override
                     public void onSuccess(String response) {
+                        adapter.add(file.getPath());
                         Log.i("UPLOAD SUCCESS", "sinistro: " + codiceSinistro + "; percorso: " + codicePercorso + "; waypoint: " + waypointIndex + ". " + response);
                         File parent = file.getParentFile();
                         File grandParent = parent.getParentFile();

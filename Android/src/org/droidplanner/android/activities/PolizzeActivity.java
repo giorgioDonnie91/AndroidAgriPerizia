@@ -64,7 +64,7 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
 
     @Override
     protected int getNavigationDrawerMenuItemId() {
-        return R.id.navigation_editor;
+        return R.id.navigation_polizze;
     }
 
     @Override
@@ -84,6 +84,9 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
 
     @Override
     public void onSearch(String search) {
+        polizzeAdapter.polizze.clear();
+        polizzeAdapter.notifyDataSetChanged();
+
         if(TextUtils.isEmpty(search))
             return;
 
@@ -222,6 +225,8 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
 
 
         private void cercaSinistri(String codicePolizza) {
+            removeSinistri((LinearLayout)clickedView.findViewById(R.id.contenitore_sinistri));
+
             Request cercaSinistriReq = ComunicazioneConServerRunnable.selectSinistriByCodicePolizzaRequest(codicePolizza);
             new Thread(new ComunicazioneConServerRunnable(
                     cercaSinistriReq,
@@ -253,7 +258,18 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
 
     }
 
+    private void removeSinistri(LinearLayout parent){
+        int childCount = parent.getChildCount();
+        if(childCount > 1)
+            parent.removeViews(1, childCount-1);
+
+        parent.setVisibility(View.GONE);
+    }
+
     private void addViewSinistro(LinearLayout parent, final Sinistro sinistro){
+        if(parent.getChildCount() == 1)
+            parent.setVisibility(View.VISIBLE);
+
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         View sinistroView = layoutInflater.inflate(R.layout.sinistro_layout, parent, false);
@@ -276,7 +292,7 @@ public class PolizzeActivity extends DrawerNavigationUI implements SearchToolFra
             e.printStackTrace();
             ((TextView)sinistroView.findViewById(R.id.data_sinistro)).setText(outputDateFormat.format("-"));
         }
-        ((TextView)sinistroView.findViewById(R.id.codice_sinistro)).setText(sinistro.getCodice());
+        ((TextView)sinistroView.findViewById(R.id.codice_sinistro)).setText(getString(R.string.codice_sinistro, sinistro.getCodice()));
         parent.addView(sinistroView, -1, params);
     }
 

@@ -30,9 +30,21 @@
         android:id="@+id/contenitore_sinistri"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:orientation="vertical"
         android:layout_below="@+id/indirizzo_seconda_linea_text_view"
-        android:animateLayoutChanges="true"/>
+        android:animateLayoutChanges="true"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/sinistri_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="10dp"
+            android:text="Sinistri"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

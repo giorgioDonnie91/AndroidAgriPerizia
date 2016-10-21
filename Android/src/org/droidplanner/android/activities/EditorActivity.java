@@ -165,8 +165,10 @@ public class EditorActivity extends DrawerNavigationUI implements
             codicePolizza = savedInstanceState.getString(EXTRA_CODICE_POLIZZA);
             primaPerizia = savedInstanceState.getBoolean(EXTRA_FIRST);
         } else {
-            codicePolizza = getIntent().getExtras().getString(EXTRA_CODICE_POLIZZA);
-            primaPerizia = getIntent().getExtras().getBoolean(EXTRA_FIRST);
+            if(getIntent().getExtras() != null) {
+                codicePolizza = getIntent().getExtras().getString(EXTRA_CODICE_POLIZZA);
+                primaPerizia = getIntent().getExtras().getBoolean(EXTRA_FIRST);
+            }
         }
 
         // Retrieve the item detail fragment using its tag

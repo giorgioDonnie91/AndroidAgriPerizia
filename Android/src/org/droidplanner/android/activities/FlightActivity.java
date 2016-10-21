@@ -219,13 +219,13 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
                 String codicePercorso = Utils.loadPreferencesData(FlightActivity.this, Utils.PREF_PERCORSO);
                 String codiceSinistro = Utils.loadPreferencesData(FlightActivity.this, Utils.PREF_SINISTRO);
                 String root = Environment.getExternalStorageDirectory().toString();
-                File myDir = new File(root + "/drone/"+(codiceSinistro == null ? "prima_perizia/" : codiceSinistro+"/")+codicePercorso);
+                File myDir = new File(root + "/drone/"+codicePercorso+"/"+(codiceSinistro == null ? "prima_perizia" : codiceSinistro));
                 myDir.mkdirs();
 
                 FileOutputStream out = null;
                 try {
-                    out = new FileOutputStream(myDir+"/"+wayPointIndex+".png");
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    out = new FileOutputStream(myDir+"/"+wayPointIndex+".jpeg");
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -242,16 +242,4 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
         }).start();
     }
 
-    public void screenshot(View view){
-        /*
-        View v = findViewById(android.R.id.content);
-        Bitmap b = Bitmap.createBitmap( v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(b);
-        v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
-        v.draw(c);
-
-        saveBitmapAsynch(b, 0);
-        */
-        onCloseTo(10);
-    }
 }

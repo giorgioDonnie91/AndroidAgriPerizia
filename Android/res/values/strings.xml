@@ -627,6 +627,8 @@
     <string name="agriperizia">agriperizia</string>
     <string name="login">Log in</string>
     <string name="server_sync">Upload perizie</string>
+    <string name="polizze">Polizze</string>
+    <string name="codice_sinistro">cod: %1$s</string>
     <plurals name="polizze_tot_string">
         <item quantity="one">%1$s result</item>
         <item quantity="other">%1$s results</item>

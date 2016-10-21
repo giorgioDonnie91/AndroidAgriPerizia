@@ -10,6 +10,11 @@
             android:title="@string/flight_data" />
 
         <item
+            android:id="@+id/navigation_polizze"
+            android:icon="@drawable/ic_menu_checklist_grey600_24dp"
+            android:title="@string/polizze" />
+
+        <item
             android:id="@+id/navigation_editor"
             android:icon="@drawable/ic_menu_editor_grey600_24dp"
             android:title="@string/editor" />
