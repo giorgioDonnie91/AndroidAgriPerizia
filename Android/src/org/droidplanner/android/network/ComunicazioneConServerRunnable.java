@@ -145,6 +145,13 @@ public class ComunicazioneConServerRunnable implements Runnable{
         );
     }
 
+    public static Request login(String username, String password){
+        LinkedList<NameValuePair> parameter = new LinkedList<>();
+        parameter.add(new NameValuePair("usr", username));
+        parameter.add(new NameValuePair("psw", password));
+        return new Get(BASE_URL + "login.php", parameter);
+    }
+
     public interface RequestListener{
         void onSuccess(String response);
         void onError(int responseCode, String response);

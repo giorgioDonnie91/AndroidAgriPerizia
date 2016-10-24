@@ -629,6 +629,8 @@
     <string name="server_sync">Upload perizie</string>
     <string name="polizze">Polizze</string>
     <string name="codice_sinistro">cod: %1$s</string>
+    <string name="dialog_wrong_password_message">Wrong usename or password</string>
+    <string name="dialog_wrong_password_title">Error!</string>
     <plurals name="polizze_tot_string">
         <item quantity="one">%1$s result</item>
         <item quantity="other">%1$s results</item>

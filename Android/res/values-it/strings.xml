@@ -291,5 +291,7 @@
     <string name="speak_disarmed">Disattivato</string>
     <string name="speak_battery_notification">Batteria al %d%%</string>
     <string name="speak_connected">Collegato</string>
+    <string name="dialog_wrong_password_message">Usename o password errati</string>
+    <string name="dialog_wrong_password_title">Errore!</string>
 
 </resources>
