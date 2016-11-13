@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -13,8 +14,12 @@ import android.support.v4.app.FragmentTransaction;
 
 import org.droidplanner.android.utils.prefs.DroidPlannerPrefs;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 
@@ -149,6 +154,26 @@ public class Utils {
     public static String loadPreferencesData(Context context, String key){
         SharedPreferences prefs = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE);
         return prefs.getString(key, null);
+    }
+
+    public static void log(String line){
+        try{
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root + "/drone");
+            if(!myDir.isDirectory())
+                myDir.mkdirs();
+            File myFile = new File(myDir.getAbsolutePath()+"/log.txt");
+
+            PrintWriter writer = new PrintWriter(new FileOutputStream(myFile, true));
+            writer.append(new Date().toString());
+            writer.append(" ");
+            writer.append(line);
+            writer.append("\r\n");
+            writer.flush();
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 	//Private constructor to prevent instantiation.

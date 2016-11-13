@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class DroneMap extends ApiListenerFragment {
 
     public static final String ACTION_UPDATE_MAP = Utils.PACKAGE_NAME + ".action.UPDATE_MAP";
-    private static final int THRESHOLD = 1;
+    private static final double THRESHOLD = 0.4;
 
 	private static final IntentFilter eventFilter = new IntentFilter();
 	static {
@@ -70,7 +71,6 @@ public abstract class DroneMap extends ApiListenerFragment {
     private static final List<MarkerInfo> NO_EXTERNAL_MARKERS = Collections.emptyList();
 
     private LatLong destinationCoordinate;
-    private double currentBestError;
     private int destinationIndex;
 
     private CloseToWaypointListener closeToWaypointListener;
@@ -94,18 +94,20 @@ public abstract class DroneMap extends ApiListenerFragment {
                     mMapFragment.updateDroneLeashPath(guided);
                     final Gps droneGps = drone.getAttribute(AttributeType.GPS);
                     if (droneGps != null && droneGps.isValid()) {
-                        mMapFragment.addFlightPathPoint(droneGps.getPosition());
-
+                        LatLong dronePosition = droneGps.getPosition();
+                        mMapFragment.addFlightPathPoint(dronePosition);
                         if(destinationCoordinate != null) {
                             double distanza = WaypointUtils.distanza(
-                                    droneGps.getPosition().getLongitude(),
-                                    droneGps.getPosition().getLatitude(),
+                                    dronePosition.getLongitude(),
+                                    dronePosition.getLatitude(),
                                     destinationCoordinate.getLongitude(),
                                     destinationCoordinate.getLatitude()
                             );
 
-                            if (distanza < THRESHOLD && distanza < currentBestError && closeToWaypointListener != null) {
-                                currentBestError = distanza;
+                            Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
+                            //Log.i("DISTANCE", distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
+
+                            if (distanza < THRESHOLD && closeToWaypointListener != null) {
                                 closeToWaypointListener.onCloseTo(destinationIndex);
                             }
                         }
@@ -163,8 +165,9 @@ public abstract class DroneMap extends ApiListenerFragment {
                         if(currentDestination.getType().equals(MissionItemType.WAYPOINT)){
                             Waypoint currentWaypoint = (Waypoint)currentDestination;
                             destinationCoordinate = currentWaypoint.getCoordinate();
-                            currentBestError = Double.MAX_VALUE;
                             destinationIndex = currentDestinationIndex;
+                            Utils.log("NEXT: Waypoint: " + destinationIndex + "; coord: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
+                            //Log.i("NEXT", "Waypoint: " + destinationIndex + "; coord: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
                         }
                     }
                     break;

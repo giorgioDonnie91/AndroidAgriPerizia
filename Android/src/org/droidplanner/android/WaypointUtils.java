@@ -1,6 +1,9 @@
 package org.droidplanner.android;
 
 
+import android.location.Location;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.o3dr.services.android.lib.coordinate.LatLongAlt;
 import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 
@@ -37,12 +40,18 @@ public class WaypointUtils {
 
 
     public static double distanza(double lon1, double lat1, double lon2, double lat2) {
+        float[] res = new float[1];
+        Location.distanceBetween(lat1, lon1, lat2, lon2, res);
+        return res[0];
+
+        /*
         final int R = 6371;
         double latDistance = ((lat2-lat1)*Math.PI/180);
         double lonDistance = ((lon2-lon1)*Math.PI/180);
         double a = (Math.sin(latDistance/2)*Math.sin(latDistance/2)+Math.cos((lat1)*Math.PI/180)*Math.cos((lat2)*Math.PI/180)*Math.sin(lonDistance/2)*Math.sin(lonDistance/2));
         double cc = (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         return R*cc*1000;
+        */
     }
 
 

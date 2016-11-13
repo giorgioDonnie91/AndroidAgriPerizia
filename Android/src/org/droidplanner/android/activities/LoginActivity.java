@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 
 import org.droidplanner.android.R;
 import org.droidplanner.android.network.ComunicazioneConServerRunnable;
+import org.droidplanner.android.utils.Utils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -40,12 +41,15 @@ public class LoginActivity extends AppCompatActivity {
 
             //inserted password
             Log.i("original password", "p: '" + password.getText() + "'");
+            Utils.log("original password: '" + password.getText() + "'");
 
             //password saved in db
             Log.i("encrypted password", "p: '" + encryptedPassword + "'");
+            Utils.log("encrypted password: '" + encryptedPassword + "'");
 
             //urlencoded password
             Log.i("urlencoded password", "p: '" + urlEncodedPassword + "'");
+            Utils.log("urlencoded password: '" + urlEncodedPassword + "'");
 
             progressBar.setVisibility(View.VISIBLE);
             new Thread(new ComunicazioneConServerRunnable(

@@ -37,9 +37,9 @@ public class Compilatore {
         if (distanza < 30) {
             Waypoint waypointMedio = WaypointUtils.waypointMedio(wp1, wp2);
 
-            retta1.add(wp1);
+            //retta1.add(wp1);
             retta1.add(waypointMedio);
-            retta1.add(wp2);
+            //retta1.add(wp2);
         } else {
             int segments = (int) Math.ceil(distanza / 30);
 
@@ -56,9 +56,9 @@ public class Compilatore {
         if (distanza < 30) {
             Waypoint waypointMedio = WaypointUtils.waypointMedio(wp1, wp2);
 
-            retta2.add(wp1);
+            //retta2.add(wp1);
             retta2.add(waypointMedio);
-            retta2.add(wp2);
+            //retta2.add(wp2);
 
         } else {
 
@@ -86,22 +86,23 @@ public class Compilatore {
             Waypoint wpp1 = i > retta1.size() ? retta1.get(retta1.size() - 1) : retta1.get(i);
             Waypoint wpp2 = i < 0 ? retta2.get(0) : retta2.get(retta1.size() - i -1);
 
-            itinerario.add(wpp1);
+            //itinerario.add(wpp1);
 
             distanza = WaypointUtils.distanza(wpp1, wpp2);
             if (distanza < 30) {
                 Waypoint waypointMedio = WaypointUtils.waypointMedio(wpp1, wpp2);
                 itinerario.add(waypointMedio);
             } else {
+                itinerario.add(wpp1);
                 int segments = (int) Math.ceil(distanza / 30);
                 List<Waypoint> puntiDivisione = WaypointUtils.getPuntiDivisione(wpp1, wpp2, segments);
                 for (Waypoint waypoint : puntiDivisione) {
                     itinerario.add(waypoint);
                 }
+                itinerario.add(wpp2);
             }
-            itinerario.add(wpp2);
+            //itinerario.add(wpp2);
         }
-
 
 
         //controllo della distanza totale

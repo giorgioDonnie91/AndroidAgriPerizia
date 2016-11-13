@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -199,9 +200,12 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
 
     @Override
     public void onCloseTo(int waypointIndex) {
+        Utils.log("CLOSE: TO: " + waypointIndex);
+        //Log.i("CLOSE", "TO: " + waypointIndex);
         if(waypointIndex <= lastSaved)
             return;
-
+        Utils.log("CLOSE: SAVING: " + waypointIndex);
+        //Log.i("CLOSE", "SAVING: " + waypointIndex);
         lastSaved = waypointIndex;
 
         FullWidgetSoloLinkVideo fullWidgetSoloLinkVideo = (FullWidgetSoloLinkVideo)getSupportFragmentManager().findFragmentById(R.id.widget_view);
@@ -220,8 +224,11 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
                 String codiceSinistro = Utils.loadPreferencesData(FlightActivity.this, Utils.PREF_SINISTRO);
                 String root = Environment.getExternalStorageDirectory().toString();
                 File myDir = new File(root + "/drone/"+codicePercorso+"/"+(codiceSinistro == null ? "prima_perizia" : codiceSinistro));
-                myDir.mkdirs();
+                if(!myDir.isDirectory())
+                    myDir.mkdirs();
 
+                Utils.log("PATH: " + myDir.getAbsolutePath() + "/" + wayPointIndex+".jpeg");
+                //Log.i("PATH", myDir.getAbsolutePath() + "/" + wayPointIndex+".jpeg");
                 FileOutputStream out = null;
                 try {
                     out = new FileOutputStream(myDir+"/"+wayPointIndex+".jpeg");

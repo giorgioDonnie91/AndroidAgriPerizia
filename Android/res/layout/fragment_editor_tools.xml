@@ -55,7 +55,8 @@
         <ImageButton
             android:id="@+id/editor_tools_undo"
             style="@style/editorButton"
-            android:src="@drawable/ic_gesture_grey_700_24dp" />
+            android:src="@drawable/route"
+            android:scaleType="centerInside"/>
 
     </RadioGroup>
 
