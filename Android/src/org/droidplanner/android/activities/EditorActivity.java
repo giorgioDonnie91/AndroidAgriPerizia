@@ -440,8 +440,10 @@ public class EditorActivity extends DrawerNavigationUI implements
 
     @Override
     public void onMapClick(LatLong point) {
+        /*
         EditorToolsImpl toolImpl = getToolImpl();
         toolImpl.onMapClick(point);
+        */
     }
 
     public EditorTools getTool() {
