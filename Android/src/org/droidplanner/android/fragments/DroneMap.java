@@ -161,7 +161,7 @@ public abstract class DroneMap extends ApiListenerFragment {
                     int currentDestinationIndex = intent.getIntExtra(AttributeEventExtra.EXTRA_MISSION_CURRENT_WAYPOINT, 0);
                     if (currentDestinationIndex != 0) {
                         //Zeroth waypoint is the home location.
-                        MissionItem currentDestination = missionProxy.getItems().get(currentDestinationIndex).getMissionItem();
+                        MissionItem currentDestination = missionProxy.getItems().get(currentDestinationIndex - 1).getMissionItem();
                         if(currentDestination.getType().equals(MissionItemType.WAYPOINT)){
                             Waypoint currentWaypoint = (Waypoint)currentDestination;
                             destinationCoordinate = currentWaypoint.getCoordinate();
