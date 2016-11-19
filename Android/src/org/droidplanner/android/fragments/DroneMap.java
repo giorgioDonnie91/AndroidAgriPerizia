@@ -17,14 +17,11 @@ import android.view.ViewGroup;
 import com.o3dr.android.client.Drone;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
-import com.o3dr.services.android.lib.drone.attribute.AttributeEventExtra;
 import com.o3dr.services.android.lib.drone.attribute.AttributeType;
-import com.o3dr.services.android.lib.drone.mission.MissionItemType;
-import com.o3dr.services.android.lib.drone.mission.item.MissionItem;
-import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 import com.o3dr.services.android.lib.drone.property.CameraProxy;
 import com.o3dr.services.android.lib.drone.property.Gps;
 
+import org.droidplanner.android.KDTree.KDNode;
 import org.droidplanner.android.R;
 import org.droidplanner.android.WaypointUtils;
 import org.droidplanner.android.fragments.helpers.ApiListenerFragment;
@@ -49,7 +46,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class DroneMap extends ApiListenerFragment {
 
     public static final String ACTION_UPDATE_MAP = Utils.PACKAGE_NAME + ".action.UPDATE_MAP";
-    private static final double THRESHOLD = 0.4;
+    private static final double THRESHOLD = 1;
 
 	private static final IntentFilter eventFilter = new IntentFilter();
 	static {
@@ -65,13 +62,9 @@ public abstract class DroneMap extends ApiListenerFragment {
 		eventFilter.addAction(AttributeEvent.ATTITUDE_UPDATED);
 		eventFilter.addAction(AttributeEvent.HOME_UPDATED);
         eventFilter.addAction(ACTION_UPDATE_MAP);
-        eventFilter.addAction(AttributeEvent.MISSION_ITEM_UPDATED);
 	}
 
     private static final List<MarkerInfo> NO_EXTERNAL_MARKERS = Collections.emptyList();
-
-    private LatLong destinationCoordinate;
-    private int destinationIndex;
 
     private CloseToWaypointListener closeToWaypointListener;
 
@@ -96,22 +89,21 @@ public abstract class DroneMap extends ApiListenerFragment {
                     if (droneGps != null && droneGps.isValid()) {
                         LatLong dronePosition = droneGps.getPosition();
                         mMapFragment.addFlightPathPoint(dronePosition);
-                        if(destinationCoordinate != null) {
-                            double distanza = WaypointUtils.distanza(
-                                    dronePosition.getLongitude(),
-                                    dronePosition.getLatitude(),
-                                    destinationCoordinate.getLongitude(),
-                                    destinationCoordinate.getLatitude()
-                            );
 
-                            Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
-                            //Log.i("DISTANCE", distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
+                        KDNode kdNode = missionProxy.nearest(dronePosition.getLatitude(), dronePosition.getLongitude());
+                        double[] coords = kdNode.getCoordinates();
 
-                            if (distanza < THRESHOLD && closeToWaypointListener != null) {
-                                closeToWaypointListener.onCloseTo(destinationIndex);
-                            }
+                        double distanza = WaypointUtils.distanza(
+                                dronePosition.getLongitude(),
+                                dronePosition.getLatitude(),
+                                coords[1],
+                                coords[0]
+                        );
+
+                        Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + coords[1] + "; " + coords[0] + ")");
+                        if (distanza < THRESHOLD && closeToWaypointListener != null) {
+                            closeToWaypointListener.onCloseTo(kdNode.getWaypointIndex());
                         }
-
                     }
                     break;
                 }
@@ -157,20 +149,6 @@ public abstract class DroneMap extends ApiListenerFragment {
                     break;
                 }
 
-                case AttributeEvent.MISSION_ITEM_UPDATED:
-                    int currentDestinationIndex = intent.getIntExtra(AttributeEventExtra.EXTRA_MISSION_CURRENT_WAYPOINT, 0);
-                    if (currentDestinationIndex != 0) {
-                        //Zeroth waypoint is the home location.
-                        MissionItem currentDestination = missionProxy.getItems().get(currentDestinationIndex - 1).getMissionItem();
-                        if(currentDestination.getType().equals(MissionItemType.WAYPOINT)){
-                            Waypoint currentWaypoint = (Waypoint)currentDestination;
-                            destinationCoordinate = currentWaypoint.getCoordinate();
-                            destinationIndex = currentDestinationIndex;
-                            Utils.log("NEXT: Waypoint: " + destinationIndex + "; coord: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
-                            //Log.i("NEXT", "Waypoint: " + destinationIndex + "; coord: (" + destinationCoordinate.getLatitude() + "; " + destinationCoordinate.getLongitude() + ")");
-                        }
-                    }
-                    break;
             }
 		}
 	};
