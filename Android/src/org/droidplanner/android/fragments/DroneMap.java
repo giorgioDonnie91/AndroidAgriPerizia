@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.o3dr.android.client.Drone;
 import com.o3dr.services.android.lib.coordinate.LatLong;
 import com.o3dr.services.android.lib.drone.attribute.AttributeEvent;
@@ -22,6 +23,7 @@ import com.o3dr.services.android.lib.drone.property.CameraProxy;
 import com.o3dr.services.android.lib.drone.property.Gps;
 
 import org.droidplanner.android.KDTree.KDNode;
+import org.droidplanner.android.KDTree.LocationKDTree;
 import org.droidplanner.android.R;
 import org.droidplanner.android.WaypointUtils;
 import org.droidplanner.android.fragments.helpers.ApiListenerFragment;
@@ -46,7 +48,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class DroneMap extends ApiListenerFragment {
 
     public static final String ACTION_UPDATE_MAP = Utils.PACKAGE_NAME + ".action.UPDATE_MAP";
-    private static final double THRESHOLD = 1;
+    private static final double THRESHOLD = 1.1;
 
 	private static final IntentFilter eventFilter = new IntentFilter();
 	static {
@@ -90,17 +92,17 @@ public abstract class DroneMap extends ApiListenerFragment {
                         LatLong dronePosition = droneGps.getPosition();
                         mMapFragment.addFlightPathPoint(dronePosition);
 
-                        KDNode kdNode = missionProxy.nearest(dronePosition.getLatitude(), dronePosition.getLongitude());
-                        double[] coords = kdNode.getCoordinates();
+                        LocationKDTree.Node kdNode = missionProxy.nearest(dronePosition.getLatitude(), dronePosition.getLongitude());
+                        LatLong coords = kdNode.getCoordinates();
 
                         double distanza = WaypointUtils.distanza(
                                 dronePosition.getLongitude(),
                                 dronePosition.getLatitude(),
-                                coords[1],
-                                coords[0]
+                                coords.getLongitude(),
+                                coords.getLatitude()
                         );
 
-                        Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + coords[1] + "; " + coords[0] + ")");
+                        Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + coords.getLatitude() + "; " + coords.getLongitude() + ")");
                         if (distanza < THRESHOLD && closeToWaypointListener != null) {
                             closeToWaypointListener.onCloseTo(kdNode.getWaypointIndex());
                         }

@@ -32,6 +32,7 @@ import com.o3dr.services.android.lib.util.MathUtils;
 
 import org.droidplanner.android.KDTree.KDNode;
 import org.droidplanner.android.KDTree.KDTree;
+import org.droidplanner.android.KDTree.LocationKDTree;
 import org.droidplanner.android.maps.DPMap;
 import org.droidplanner.android.maps.MarkerInfo;
 import org.droidplanner.android.proxy.mission.item.MissionItemProxy;
@@ -91,7 +92,7 @@ public class MissionProxy implements DPMap.PathSource {
      */
     private final List<MissionItemProxy> missionItemProxies = new ArrayList<MissionItemProxy>();
 
-    private KDTree waypoints;
+    private LocationKDTree waypoints;
 
     private final LocalBroadcastManager lbm;
     private final DroidPlannerPrefs dpPrefs;
@@ -309,22 +310,15 @@ public class MissionProxy implements DPMap.PathSource {
 
     public void mAddWaypoints(List<Waypoint> waypoints){
         int i=0;
-        this.waypoints = new KDTree(1000);
+        this.waypoints = new LocationKDTree(waypoints);
         missionItemProxies.clear();
         for(Waypoint waypoint : waypoints) {
             addMissionItem(waypoint);
-            this.waypoints.add(
-                    new double[] {
-                            waypoint.getCoordinate().getLatitude(),
-                            waypoint.getCoordinate().getLongitude()
-                    },
-                    i++
-            );
         }
     }
 
-    public KDNode nearest(double latitude, double longitude){
-        return waypoints.findNearest(new double[]{latitude, longitude});
+    public LocationKDTree.Node nearest(double latitude, double longitude){
+        return waypoints.findNearest(latitude, longitude);
     }
 
     /**

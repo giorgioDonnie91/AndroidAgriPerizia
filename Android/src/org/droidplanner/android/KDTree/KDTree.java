@@ -1,6 +1,8 @@
 package org.droidplanner.android.KDTree;
 
 
+import org.droidplanner.android.WaypointUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -152,33 +154,39 @@ public class KDTree{
     }
 
     public static void main(String args[]) throws IOException {
-        int numPoints = 900;
+        KDTree kdt = new KDTree(20);
 
-        KDTree kdt = new KDTree(numPoints);
-        double x[] = new double[2];
+        kdt.add(new double[]{7.6391296386719, 45.130867004395}, 1);
+        kdt.add(new double[]{7.6389619827271, 45.131087493896}, 2);
+        kdt.add(new double[]{7.6387943267822, 45.131307983398}, 3);
+        kdt.add(new double[]{7.6386266708374, 45.1315284729}, 4);
+        kdt.add(new double[]{7.6384590148926, 45.131748962402}, 5);
+        kdt.add(new double[]{7.6382913589478, 45.131969451904}, 6);
+        kdt.add(new double[]{7.6388618946075, 45.130737304688}, 7);
+        kdt.add(new double[]{7.6387059211731, 45.130970001221}, 8);
+        kdt.add(new double[]{7.6385499477386, 45.131202697754}, 9);
+        kdt.add(new double[]{7.6383939743042, 45.131435394287}, 10);
+        kdt.add(new double[]{7.6382380008698, 45.13166809082}, 11);
+        kdt.add(new double[]{7.6380820274353, 45.131900787354}, 12);
+        kdt.add(new double[]{7.6385941505432, 45.13060760498}, 13);
+        kdt.add(new double[]{7.6384498596191, 45.130852508545}, 14);
+        kdt.add(new double[]{7.6383055686951, 45.131097412109}, 15);
+        kdt.add(new double[]{7.638161277771, 45.131342315674}, 16);
+        kdt.add(new double[]{7.6380169868469, 45.131587219238}, 17);
+        kdt.add(new double[]{7.6378726959229, 45.131832122803}, 18);
 
-        long start = System.currentTimeMillis();
+        while(true) {
+            System.out.println("Enter the co-ordinates of the point: (one after the other)");
+            InputStreamReader reader = new InputStreamReader(System.in);
+            BufferedReader br = new BufferedReader(reader);
+            double sx = Double.parseDouble(br.readLine());
+            double sy = Double.parseDouble(br.readLine());
 
-        int tot = 0;
-        for(int i=0; i<30; i++){
-            for(int j=0; j<30; j++){
-                x[0] = i;
-                x[1] = j;
-                kdt.add(x, tot++);
-            }
+            double s[] = {sx, sy};
+            KDNode kdn = kdt.findNearest(s);
+            System.out.println("The nearest neighbor is: " + kdn.getWaypointIndex());
+            //System.out.println("The distance is: " + WaypointUtils.distanza(sy, sx, kdn.x[1], kdn.x[0]));
         }
-        System.out.println("loading millisec: " + (System.currentTimeMillis() - start));
-
-        System.out.println("Enter the co-ordinates of the point: (one after the other)");
-        InputStreamReader reader = new InputStreamReader(System.in);
-        BufferedReader br = new BufferedReader(reader);
-        double sx = Double.parseDouble(br.readLine());
-        double sy = Double.parseDouble(br.readLine());
-
-        double s[] = { sx, sy };
-        KDNode kdn = kdt.findNearest(s);
-        System.out.println("The nearest neighbor is: ");
-        System.out.println("(" + kdn.x[0] + " , " + kdn.x[1] + ")");
     }
 
 }
