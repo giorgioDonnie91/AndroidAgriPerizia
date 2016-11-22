@@ -200,11 +200,11 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
 
     @Override
     public void onCloseTo(int waypointIndex) {
-        Utils.log("CLOSE: TO: " + waypointIndex);
+        //Utils.log("CLOSE: TO: " + waypointIndex);
         //Log.i("CLOSE", "TO: " + waypointIndex);
         if(waypointIndex <= lastSaved)
             return;
-        Utils.log("CLOSE: SAVING: " + waypointIndex);
+        //Utils.log("CLOSE: SAVING: " + waypointIndex);
         //Log.i("CLOSE", "SAVING: " + waypointIndex);
         lastSaved = waypointIndex;
 
@@ -227,7 +227,7 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
                 if(!myDir.isDirectory())
                     myDir.mkdirs();
 
-                Utils.log("PATH: " + myDir.getAbsolutePath() + "/" + wayPointIndex+".jpeg");
+                //Utils.log("PATH: " + myDir.getAbsolutePath() + "/" + wayPointIndex+".jpeg");
                 //Log.i("PATH", myDir.getAbsolutePath() + "/" + wayPointIndex+".jpeg");
                 FileOutputStream out = null;
                 try {

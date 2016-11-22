@@ -211,7 +211,7 @@ public class EditorActivity extends DrawerNavigationUI implements
                     @Override
                     public void onSuccess(String response) {
                         Log.i("Creazione percorso", "Successo");
-                        Utils.savePreferencesData(EditorActivity.this, Utils.PREF_PERCORSO, response);
+                        Utils.savePreferencesData(EditorActivity.this, Utils.PREF_PERCORSO, response.trim());
                         new Thread(new ComunicazioneConServerRunnable(
                                 ComunicazioneConServerRunnable.createWayPoints(response, waypoints),
                                 new ComunicazioneConServerRunnable.RequestListener() {

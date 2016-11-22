@@ -102,7 +102,7 @@ public abstract class DroneMap extends ApiListenerFragment {
                                 coords.getLatitude()
                         );
 
-                        Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + coords.getLatitude() + "; " + coords.getLongitude() + ")");
+                        //Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + coords.getLatitude() + "; " + coords.getLongitude() + ")");
                         if (distanza < THRESHOLD && closeToWaypointListener != null) {
                             closeToWaypointListener.onCloseTo(kdNode.getWaypointIndex());
                         }
