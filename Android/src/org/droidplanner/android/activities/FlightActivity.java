@@ -11,6 +11,8 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.o3dr.android.client.Drone;
+import com.o3dr.android.client.apis.solo.SoloCameraApi;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import org.droidplanner.android.R;
@@ -199,7 +201,7 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
     }
 
     @Override
-    public void onCloseTo(int waypointIndex) {
+    public void onCloseTo(Drone drone, int waypointIndex) {
         //Utils.log("CLOSE: TO: " + waypointIndex);
         //Log.i("CLOSE", "TO: " + waypointIndex);
         if(waypointIndex <= lastSaved)
@@ -213,10 +215,10 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
             return;
 
         TextureView textureView = (TextureView)fullWidgetSoloLinkVideo.getView().findViewById(R.id.sololink_video_view);
-        saveBitmapAsynch(textureView.getBitmap(), waypointIndex);
+        saveBitmapAsynch(drone, textureView.getBitmap(), waypointIndex);
     }
 
-    public void saveBitmapAsynch(final Bitmap bitmap, final int wayPointIndex){
+    public void saveBitmapAsynch(final Drone drone, final Bitmap bitmap, final int wayPointIndex){
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -245,6 +247,7 @@ public class FlightActivity extends DrawerNavigationUI implements SlidingUpPanel
                         e.printStackTrace();
                     }
                 }
+                SoloCameraApi.getApi(drone).takePhoto(null);
             }
         }).start();
     }

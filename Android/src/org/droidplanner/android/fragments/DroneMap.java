@@ -104,7 +104,7 @@ public abstract class DroneMap extends ApiListenerFragment {
 
                         //Utils.log("DISTANCE: "+distanza+"m; drone: (" + dronePosition.getLatitude() + "; " + dronePosition.getLongitude() + "), next: (" + coords.getLatitude() + "; " + coords.getLongitude() + ")");
                         if (distanza < THRESHOLD && closeToWaypointListener != null) {
-                            closeToWaypointListener.onCloseTo(kdNode.getWaypointIndex());
+                            closeToWaypointListener.onCloseTo(getDrone(), kdNode.getWaypointIndex());
                         }
                     }
                     break;
@@ -447,6 +447,6 @@ public abstract class DroneMap extends ApiListenerFragment {
     }
 
     public interface CloseToWaypointListener{
-        void onCloseTo(int waypointIndex);
+        void onCloseTo(Drone drone, int waypointIndex);
     }
 }
