@@ -40,11 +40,11 @@
         android:id="@+id/editor_sub_tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/editor_tools_layout"
-        android:layout_alignLeft="@+id/editor_tools_layout"
-        android:layout_alignRight="@+id/editor_tools_layout"
-        android:layout_alignStart="@+id/editor_tools_layout"
-        android:layout_below="@+id/editor_tools_layout"
+        android:layout_alignEnd="@+id/editor_tools_undo"
+        android:layout_alignLeft="@+id/editor_tools_undo"
+        android:layout_alignRight="@+id/editor_tools_undo"
+        android:layout_alignStart="@+id/editor_tools_undo"
+        android:layout_below="@+id/editor_tools_undo"
         android:orientation="vertical">
 
         <View
