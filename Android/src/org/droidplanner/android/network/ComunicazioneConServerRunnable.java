@@ -90,17 +90,9 @@ public class ComunicazioneConServerRunnable implements Runnable{
         return new Get(BASE_URL + "getPercorsiByCodPZ.php", parameter);
     }
 
-
     public static Request createPercorso(String codicePolizza){
         LinkedList<NameValuePair> parameter = new LinkedList<>();
         parameter.add(new NameValuePair("codPR", String.valueOf( (int)(Math.random()*1000000) )));
-        parameter.add(new NameValuePair("codPZ", codicePolizza));
-        return new Post(BASE_URL + "newPercorso.php", parameter);
-    }
-
-    public static Request createPercorso(String codicePercorso, String codicePolizza){
-        LinkedList<NameValuePair> parameter = new LinkedList<>();
-        parameter.add(new NameValuePair("codPR", codicePercorso));
         parameter.add(new NameValuePair("codPZ", codicePolizza));
         return new Post(BASE_URL + "newPercorso.php", parameter);
     }

@@ -25,40 +25,16 @@
         android:layout_toRightOf="@+id/vehicle_status_fragment"
         android:background="@color/light_grey" />
 
-    <RadioGroup
-        android:id="@+id/editor_tools_layout"
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/editor_tools_undo"
+        android:layout_width="wrap_content"
         android:layout_height="48dp"
+        style="@style/editorButton"
+        android:src="@drawable/route"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true"
         android:layout_toEndOf="@+id/drone_connected_icon_separator"
-        android:layout_toRightOf="@+id/drone_connected_icon_separator"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <org.droidplanner.android.view.button.RadioButtonCenter
-            android:id="@+id/editor_tools_marker"
-            style="@style/editorButton"
-            android:button="@drawable/ic_gesture_grey_700_24dp"
-            android:visibility="invisible" />
-
-        <org.droidplanner.android.view.button.RadioButtonCenter
-            android:id="@+id/editor_tools_selector"
-            style="@style/editorButton"
-            android:button="@drawable/ic_tab_unselected_grey_700_24dp"
-            android:visibility="invisible" />
-
-        <org.droidplanner.android.view.button.RadioButtonCenter
-            android:id="@+id/editor_tools_trash"
-            style="@style/editorButton.Trash"
-            android:button="@drawable/ic_delete_grey_700_24dp"
-            android:visibility="invisible"/>
-
-        <ImageButton
-            android:id="@+id/editor_tools_undo"
-            style="@style/editorButton"
-            android:src="@drawable/route"
-            android:scaleType="centerInside"/>
-
-    </RadioGroup>
+        android:layout_toRightOf="@+id/drone_connected_icon_separator"/>
 
     <LinearLayout
         android:id="@+id/editor_sub_tools"

@@ -64,8 +64,7 @@ public abstract class DrawerNavigationUI extends SuperUI implements SlidingDrawe
         mDrawerLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_drawer_navigation_ui, null);
         contentLayout = (FrameLayout) mDrawerLayout.findViewById(R.id.content_layout);
 
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
             @Override
             public void onDrawerClosed(View drawerView) {

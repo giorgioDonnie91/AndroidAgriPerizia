@@ -30,8 +30,6 @@ import com.o3dr.services.android.lib.drone.mission.item.spatial.SplineWaypoint;
 import com.o3dr.services.android.lib.drone.mission.item.spatial.Waypoint;
 import com.o3dr.services.android.lib.util.MathUtils;
 
-import org.droidplanner.android.KDTree.KDNode;
-import org.droidplanner.android.KDTree.KDTree;
 import org.droidplanner.android.KDTree.LocationKDTree;
 import org.droidplanner.android.maps.DPMap;
 import org.droidplanner.android.maps.MarkerInfo;

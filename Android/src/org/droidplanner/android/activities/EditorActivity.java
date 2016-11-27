@@ -203,6 +203,8 @@ public class EditorActivity extends DrawerNavigationUI implements
     }
 
     public void generaPercorso(){
+        if(codicePolizza == null)
+            return;
         ArrayList<LatLng> vertices = planningMapFragment.getWrapperPercorso().getVertices();
         final List<Waypoint> waypoints = Compilatore.generaItinerario(vertices);
         new Thread(new ComunicazioneConServerRunnable(

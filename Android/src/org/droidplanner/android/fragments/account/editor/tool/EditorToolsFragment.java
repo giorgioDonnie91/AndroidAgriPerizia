@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,14 +24,13 @@ import org.droidplanner.android.fragments.helpers.ApiListenerFragment;
 import org.droidplanner.android.proxy.mission.MissionProxy;
 import org.droidplanner.android.proxy.mission.item.MissionItemProxy;
 import org.droidplanner.android.proxy.mission.item.adapters.AdapterMissionItems;
-import org.droidplanner.android.view.button.RadioButtonCenter;
 
 
 /**
  * This fragment implements and displays the 'tools' used in the editor window
  * to switch between different type of waypoints creation.
  */
-public class EditorToolsFragment extends ApiListenerFragment implements OnClickListener, SupportYesNoDialog.Listener {
+public class EditorToolsFragment extends ApiListenerFragment implements SupportYesNoDialog.Listener {
 
     /**
      * Used as key to retrieve the last selected tool from the bundle passed on
@@ -85,7 +83,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
     }
 
     EditorToolListener listener;
-    private RadioGroup mEditorRadioGroup;
     private EditorTools tool = DEFAULT_TOOL;
     private MissionProxy mMissionProxy;
 
@@ -119,11 +116,9 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
 
         final Context context = getContext();
 
-        mEditorRadioGroup = (RadioGroup) view.findViewById(R.id.editor_tools_layout);
         editorSubTools = view.findViewById(R.id.editor_sub_tools);
 
         final MarkerToolsImpl markerToolImpl = (MarkerToolsImpl) editorToolsImpls[EditorTools.MARKER.ordinal()];
-        final RadioButtonCenter buttonMarker = (RadioButtonCenter) view.findViewById(R.id.editor_tools_marker);
         final AdapterMissionItems markerItemsAdapter = new AdapterMissionItems(context,
                 R.layout.spinner_drop_down_mission_item, MarkerToolsImpl.MARKER_ITEMS_TYPE);
         markerItemsSpinner = (Spinner) view.findViewById(R.id.marker_items_spinner);
@@ -131,7 +126,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         markerItemsSpinner.setSelection(markerItemsAdapter.getPosition(markerToolImpl.getSelected()));
         markerItemsSpinner.setOnItemSelectedListener(markerToolImpl);
 
-        final RadioButtonCenter buttonTrash = (RadioButtonCenter) view.findViewById(R.id.editor_tools_trash);
         final TrashToolsImpl trashToolImpl = (TrashToolsImpl) editorToolsImpls[EditorTools.TRASH.ordinal()];
 
         clearSubOptions = view.findViewById(R.id.clear_sub_options);
@@ -142,14 +136,10 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         clearSelected = (TextView) view.findViewById(R.id.clear_selected_button);
         clearSelected.setOnClickListener(trashToolImpl);
 
-        final RadioButtonCenter buttonSelector = (RadioButtonCenter) view.findViewById(R.id.editor_tools_selector);
         final SelectorToolsImpl selectorToolImpl = (SelectorToolsImpl) editorToolsImpls[EditorTools.SELECTOR.ordinal()];
         selectAll = (TextView) view.findViewById(R.id.select_all_button);
         selectAll.setOnClickListener(selectorToolImpl);
 
-        for (View vv : new View[]{buttonMarker, buttonTrash, buttonSelector}) {
-            vv.setOnClickListener(this);
-        }
     }
 
     @Override
@@ -222,15 +212,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         return editorToolsImpls[tool.ordinal()];
     }
 
-    @Override
-    public void onClick(View v) {
-        EditorTools newTool = getToolForView(v.getId());
-        if (this.tool == newTool)
-            newTool = EditorTools.NONE;
-
-        setTool(newTool);
-    }
-
     private void hideSubTools() {
         if (editorSubTools != null)
             editorSubTools.setVisibility(View.GONE);
@@ -276,7 +257,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
                 case LAND:
                 case RETURN_TO_LAUNCH:
                     tool = EditorTools.NONE;
-                    mEditorRadioGroup.clearCheck();
                     Toast.makeText(getActivity(), getString(R.string.editor_err_land_rtl_added),
                             Toast.LENGTH_SHORT).show();
                     break;
@@ -287,9 +267,7 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
         }
 
         this.tool = tool;
-        if (tool == EditorTools.NONE) {
-            mEditorRadioGroup.clearCheck();
-        }
+
 
         updateSubToolsVisibility();
 
@@ -300,27 +278,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
 
     private void updateSubToolsVisibility() {
         hideSubTools();
-        switch (tool) {
-            /*
-            case SELECTOR:
-                editorSubTools.setVisibility(View.VISIBLE);
-                selectAll.setVisibility(View.VISIBLE);
-                break;
-
-            case TRASH:
-                editorSubTools.setVisibility(View.VISIBLE);
-                clearSubOptions.setVisibility(View.VISIBLE);
-                break;
-
-            case MARKER:
-                editorSubTools.setVisibility(View.VISIBLE);
-                markerItemsSpinner.setVisibility(View.VISIBLE);
-                break;
-            */
-            default:
-                hideSubTools();
-                break;
-        }
     }
 
     /**
@@ -330,53 +287,6 @@ public class EditorToolsFragment extends ApiListenerFragment implements OnClickL
      */
     public void setToolAndUpdateView(EditorTools tool) {
         setTool(tool, false);
-        mEditorRadioGroup.check(getViewForTool(tool));
-    }
-
-    /**
-     * Retrieves the tool matching the selected view.
-     *
-     * @param viewId id of the selected view.
-     * @return matching tool
-     */
-    private EditorTools getToolForView(int viewId) {
-        switch (viewId) {
-            case R.id.editor_tools_marker:
-                return EditorTools.MARKER;
-
-            case R.id.editor_tools_trash:
-                return EditorTools.TRASH;
-
-            case R.id.editor_tools_selector:
-                return EditorTools.SELECTOR;
-
-            default:
-                return EditorTools.NONE;
-        }
-    }
-
-    /**
-     * Retrieves the view matching the selected tool.
-     *
-     * @param tool selected tool
-     * @return matching view id.
-     */
-    private int getViewForTool(EditorTools tool) {
-        switch (tool) {
-            case MARKER:
-                return R.id.editor_tools_marker;
-
-            case TRASH:
-                return R.id.editor_tools_trash;
-
-            case SELECTOR:
-                return R.id.editor_tools_selector;
-
-            case NONE:
-            default:
-                // Passing -1 to the radio group clear the selected radio button.
-                return -1;
-        }
     }
 
     @Override

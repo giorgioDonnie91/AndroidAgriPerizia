@@ -98,4 +98,17 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private class jkdsncd implements ComunicazioneConServerRunnable.RequestListener{
+
+        @Override
+        public void onSuccess(String response) {
+
+        }
+
+        @Override
+        public void onError(int responseCode, String response) {
+
+        }
+    }
+
 }

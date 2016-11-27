@@ -60,9 +60,10 @@ public class EditorMapFragment extends DroneMap implements DPMap.OnMapLongClickL
 		mMapFragment.setOnMapClickListener(this);
 		mMapFragment.setOnMapLongClickListener(this);
 
-        if(!((EditorActivity)getActivity()).isPrimaPerizia()){
+        String codPZ = ((EditorActivity) getActivity()).getCodicePolizza();
+        if(codPZ != null && !((EditorActivity)getActivity()).isPrimaPerizia()){
             new Thread(new ComunicazioneConServerRunnable(
-                    ComunicazioneConServerRunnable.selectPercorsiByCodicePolizzaRequest(((EditorActivity) getActivity()).getCodicePolizza()),
+                    ComunicazioneConServerRunnable.selectPercorsiByCodicePolizzaRequest(codPZ),
                     new ComunicazioneConServerRunnable.RequestListener() {
                         @Override
                         public void onSuccess(String response) {
